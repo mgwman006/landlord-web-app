@@ -1,23 +1,72 @@
 import axios from 'axios';
+import { ApiResponse } from '../models/common';
+import { ApiError } from '../models/error';
+import { MembershipDetailsDTO } from '../models/user';
 
-const api = axios.create({
-  // baseURL: 'http://127.0.0.1:8080/api/v1',
-  baseURL:'https://property-management-api-706081124104.africa-south1.run.app/api/v1',
+const apiUrl = import.meta.env.VITE_RENT_MANAGER_API_URL;
+
+
+export const apiClient = axios.create({
+  baseURL: `${apiUrl}/rent-manager/v1`,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
 
-// api.interceptors.request.use(
-//   (config) => {
-//     const token = localStorage.getItem('token');
-//     if (token) {
-//       config.headers.Authorization = `Bearer ${token}`;
-//     }
-//     return config;
-//   },
-//   (error) => Promise.reject(error)
-// );
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response) {
+      const { message, data, statusCode } = error.response.data;
 
-export default api;
+      return Promise.reject(
+        new ApiError({
+          message: message ?? "SERVER_ERROR",
+          data: data ?? null,
+          statusCode: statusCode ?? error.response.status,
+        })
+      );
+    }
+
+    if (error.request) {
+      return Promise.reject(
+        new ApiError({
+          message: "NETWORK_ERROR",
+          data: "No response from server",
+          statusCode: 0,
+        })
+      );
+    }
+
+    return Promise.reject(
+      new ApiError({
+        message: "CLIENT_ERROR",
+        data: "Unexpected error occurred",
+        statusCode: 0,
+      })
+    );
+  }
+);
+
+
+export const membershipApi = {
+  getAllMemberships: async (userId: number, token: string) => {
+    const res = await apiClient.get<ApiResponse<MembershipDetailsDTO []>>(`/memberships/${userId}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    return handleResponse(res.data);
+  }
+};
+
+
+export function handleResponse<T>(response: ApiResponse<T>): T {
+  if (!response.success) {
+    throw new Error(response.message ?? "Request failed");
+  }
+
+  return response.data;
+}

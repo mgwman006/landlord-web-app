@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
+import { AccountProvider } from "./store/account/AccountContext";
 
 const rootElement = document.getElementById("root");
 
@@ -12,6 +13,8 @@ const root = ReactDOM.createRoot(rootElement);
 
 root.render(
   <React.StrictMode>
-    <App />
+    <AccountProvider>
+      <App />
+    </AccountProvider>
   </React.StrictMode>
 );

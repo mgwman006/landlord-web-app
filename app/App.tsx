@@ -7,6 +7,7 @@ type RouteConfig = {
   Component?: React.ComponentType<any>;
   children?: RouteConfig[];
 };
+
 function renderRoutes(routes: RouteConfig[]) {
   return routes.map(({ path, Component, children }) => {
     const RouteComponent = Component ?? React.Fragment;
