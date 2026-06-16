@@ -79,7 +79,7 @@ export default function AppLayout() {
         )}
 
         {/* DESKTOP CTA BUTTONS */}
-        {!isMobile && (
+        {/* {!isMobile && (
           <div style={{ display: 'flex', gap: 8, padding: '0 24px', flexShrink: 0 }}>
             <Button ghost style={{ fontWeight: 700, fontSize: 13 }}>Log in</Button>
             <Button
@@ -89,7 +89,7 @@ export default function AppLayout() {
               Get Started
             </Button>
           </div>
-        )}
+        )} */}
 
         {/* MOBILE HAMBURGER */}
         {isMobile && (
@@ -135,7 +135,7 @@ export default function AppLayout() {
             {item.label}
           </Link>
         ))}
-        <div style={{ padding: '16px 24px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+        {/* <div style={{ padding: '16px 24px', display: 'flex', flexDirection: 'column', gap: 10 }}>
           <Button block style={{ fontWeight: 700 }}>Log in</Button>
           <Button
             block
@@ -144,7 +144,7 @@ export default function AppLayout() {
           >
             Get Started Free →
           </Button>
-        </div>
+        </div> */}
       </Drawer>
 
       <Content style={{ backgroundColor: '#fff' }}>

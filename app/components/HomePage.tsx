@@ -23,9 +23,9 @@ import {
   MobileFilled,
 } from "@ant-design/icons";
 import { useSearchParams } from "react-router-dom";
-import { AccountState } from "../models/user";
+import { AccountState, MembershipDetailsDTO } from "../models/user";
 import { useAccount } from "../store/account/AccountContext";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { membershipApi } from "../api/api";
 import { handleApiError } from "../utilities/error-handler";
 
@@ -46,10 +46,11 @@ const authUrl = import.meta.env.VITE_AUTH_URL;
 
 export default function HomePage() 
 {
-  const [notificationApi, contextHolder] = notification.useNotification();
-  const { accountState, dispatchAccountState } = useAccount();
   const [searchParams] = useSearchParams();
   const accountStateString = searchParams.get("state");
+  const [notificationApi, contextHolder] = notification.useNotification();
+  const { accountState, dispatchAccountState } = useAccount();
+  const [memberships, setMemberships] = useState<MembershipDetailsDTO[]>([]);
 
   useEffect(() => {
     if (!accountStateString) {
@@ -78,6 +79,7 @@ export default function HomePage()
         return;
       }
       const response = await membershipApi.getAllMemberships(userId,token);
+      setMemberships(response);
       console.log("Memberships:", response);
     } 
     catch (error:any) 
@@ -91,8 +93,36 @@ export default function HomePage()
   return (
     <div style={{ minHeight: "100vh", background: "#fff", fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
       {contextHolder}
-      <p>Home page</p>
 
+      {
+        memberships.length > 0 ? (
+          <Card style={{ margin: "20px" }}>
+            <Title level={4}>Your Memberships</Title>
+            {memberships.map((membership) => (
+              <Card key={membership.id} style={{ marginBottom: "10px" }}>
+                <Row gutter={16}>
+                  <Col span={12}>
+                    <Text strong>Rental Profile ID:</Text> {membership.rentalProfileId}
+                  </Col>
+                  <Col span={12}>
+                    <Text strong>Business Roles:</Text> {membership.businessRoles.join(", ")}
+                  </Col>
+                </Row>
+              </Card>
+            ))}
+          </Card>
+        )   
+       : (
+        <Card style={{ margin: "20px", textAlign: "center" }}>
+          <Title level={4}>No Rental Profiles Found</Title>
+          <Paragraph>You currently do not have any rental profiles associated with your account.</Paragraph>
+          <Button type="primary" onClick={() => getMembershipStatus(accountState.accountDetails?.userDetails?.id as number, accountState.accountDetails?.token)}>
+            Create Rental Profile
+          </Button>
+        </Card>
+      )
+     }
     </div>
+
   );
 }
