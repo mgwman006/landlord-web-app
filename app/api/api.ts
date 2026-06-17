@@ -2,6 +2,7 @@ import axios from 'axios';
 import { ApiResponse } from '../models/common';
 import { ApiError } from '../models/error';
 import { MembershipDetailsDTO } from '../models/user';
+import { CreateRentalProfileDTO, RentalProfileDetailsDTO } from '../models/rentalprofile';
 
 const apiUrl = import.meta.env.VITE_RENT_MANAGER_API_URL;
 
@@ -57,6 +58,22 @@ export const membershipApi = {
         'Authorization': `Bearer ${token}`
       }
     });
+
+    return handleResponse(res.data);
+  }
+};
+
+export const rentalProfileApi = {
+  createRentalProfile: async (requestBody: CreateRentalProfileDTO, token: string) => {
+    const res = await apiClient.post<ApiResponse<RentalProfileDetailsDTO>>(
+      `/rentalprofiles`,
+      requestBody,
+      {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      }
+    );
 
     return handleResponse(res.data);
   }

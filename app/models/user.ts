@@ -81,6 +81,7 @@ export interface MembershipDetailsDTO
   id:number;
   userId:number,
   rentalProfileId:number,
+  rentalProfileName:string,
   businessRoles:string[]
 }
 
