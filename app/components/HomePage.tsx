@@ -46,9 +46,7 @@ const MUTED = "#64748B";
 const BORDER = "#E2E8F0";
 const OFF = "#F8FAFC";
 
-const authUrl = import.meta.env.VITE_AUTH_URL;
-
-
+const authUrl = import.meta.env.VITE_AUTH_URL?.trim();
 
 export default function HomePage() 
 {
@@ -57,15 +55,11 @@ export default function HomePage()
   const [notificationApi, contextHolder] = notification.useNotification();
   const { accountState, dispatchAccountState } = useAccount();
   const [memberships, setMemberships] = useState<MembershipDetailsDTO[]>([]);
+  const [form] = Form.useForm();
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const showModal = () => {
-    setIsModalOpen(true);
-  };
 
   const handleOk = async (rentalProfileData: any) => {
-    setIsModalOpen(false);
     const newRentalProfile: CreateRentalProfileDTO = {
       adminUserId: accountState.accountDetails?.userDetails?.id as number,
       type: rentalProfileData.category,
@@ -97,36 +91,7 @@ export default function HomePage()
     }
   };
 
-  const handleCancel = () => {
-    setIsModalOpen(false);
-  };
-
-
-  useEffect(() => {
-    if (!accountStateString) {
-      if (!authUrl) {
-        console.error("VITE_AUTH_URL is not set");
-        return;
-      }
-      window.location.href = authUrl;
-      return;
-    } else {
-      const receivedAccountState: AccountState = JSON.parse(accountStateString);
-      console.log("Received account state:", receivedAccountState);
-      const details = receivedAccountState.accountDetails;
-      if (!details) {
-        console.error("Account state payload is missing accountDetails");
-        return;
-      }
-      dispatchAccountState({ type: "FETCH_SUCCESS", payload: details });
-      getMembershipStatus(
-        details.userDetails?.id as number,
-        details.token
-      );
-    }
-  }, []);
-
-  const getMembershipStatus = async (userId: number, token?: string) => {
+   const getMembershipStatus = async (userId: number, token?: string) => {
     try 
     {
       if (!token) {
@@ -142,6 +107,53 @@ export default function HomePage()
         handleApiError(error,notificationApi);
     }
   }
+
+
+  useEffect(() => {
+    if (accountState.accountDetails) {
+      return;
+    }
+
+    if (accountStateString) {
+      try {
+        const receivedAccountState: AccountState = JSON.parse(accountStateString);
+        const details = receivedAccountState.accountDetails;
+        if (!details) {
+          console.error("Account state payload is missing accountDetails");
+          return;
+        }
+        dispatchAccountState({ type: "FETCH_SUCCESS", payload: details });
+        getMembershipStatus(
+          details.userDetails?.id as number,
+          details.token
+        );
+        form.setFieldsValue({
+          phoneNumber: details.userDetails?.phoneNumber,
+        });
+      } catch (error) {
+        console.error("Failed to parse account state from URL", error);
+      }
+      return;
+    }
+
+    if (!authUrl) {
+      console.info("VITE_AUTH_URL is not set; skipping redirect.");
+      return;
+    }
+
+    try {
+      const targetUrl = new URL(authUrl, window.location.origin);
+      if (targetUrl.origin === window.location.origin) {
+        console.warn("Auth URL resolves to the current app origin; skipping redirect to avoid a refresh loop.");
+        return;
+      }
+      window.location.href = authUrl;
+    } catch (error) {
+      console.error("Invalid auth URL", error);
+    }
+  }, [accountState.accountDetails, accountStateString, authUrl, dispatchAccountState, form]);
+
+ 
 
   
 
@@ -165,48 +177,31 @@ export default function HomePage()
           </Card>
         )   
        : (
-        <Card style={{ margin: "20px", textAlign: "center" }}>
-          <Title level={4}>No Rental Profiles Found</Title>
-          <Paragraph>You currently do not have any rental profiles associated with your account.</Paragraph>
-          <Button type="primary" onClick={showModal}>
-            Create Rental Profile
-          </Button>
-
-          <Modal
-            title="Create Rental Profile"
-            closable={{ 'aria-label': 'Custom Close Button' }}
-            open={isModalOpen}
-            onCancel={handleCancel}
-            footer={null}
-          >
+        <Row align="middle" justify="center" style={{ minHeight: "100vh" }}>
+          <Col sm={24} md={24} lg={6} xl={6}>
+            <Title level={4}>Confirm your Mobile money payment number</Title>
             <Form 
-              layout="vertical"
-              onFinish={(values) => {
-                handleOk(values);
-              }}
-            >
-
-              <Form.Item label="Category" name="category" rules={[{ required: true, message: 'Please select a category' }]}>
-                <Select placeholder="Select category">
-                  <Select.Option value="INDIVIDUAL">Individual</Select.Option>
-                  <Select.Option value="BUSINESS">Business</Select.Option>
-                </Select>
-              </Form.Item>
-              <Form.Item label="Name" name="name" rules={[{ required: true, message: 'Please enter the name' }]}>
-                <Input placeholder="Enter Name" />
-              </Form.Item>
-              <Form.Item label="Business Email" name="businessEmail" rules={[{ required: true, message: 'Please enter the business email' }, { type: 'email', message: 'Please enter a valid email' }]}>
-                <Input placeholder="Enter Business Email" />
-              </Form.Item>
-              <Form.Item>
-                <Button type="primary" htmlType="submit">
-                  Submit
-                </Button>
-              </Form.Item>
-            </Form>
+                size="large"
+                form={form}
+                layout="vertical"
+                onFinish={(values) => {handleOk(values);}}
+              >
+                <Form.Item name="phoneNumber" rules={[{ required: true, message: 'Please enter the phone number' }]}>
+                  <Input 
+                    type="tel" 
+                    placeholder="Enter Phone Number" 
+                  />
+                </Form.Item>
+                <Form.Item>
+                  <Button type="primary" htmlType="submit">
+                    Confirm <ArrowRightOutlined />
+                  </Button>
+                </Form.Item>
+              </Form>
+          </Col>
           
-          </Modal>
-        </Card>
+         
+        </Row>
       )
      }
     </div>

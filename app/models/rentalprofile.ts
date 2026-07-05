@@ -22,4 +22,14 @@ export interface RentalProfileDetailsDTO
   businessEmail: string;
   type: RentalProfileType;
   memberships: MembershipDetailsDTO[];
+  units: RentalUnitDetailsDTO[];
+}
+
+export interface RentalUnitDetailsDTO
+{
+  id: number;
+  name: string;
+  address: string;
+  unitType: string;
+  rentalProfileId: number;
 }
