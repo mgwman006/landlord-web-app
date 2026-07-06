@@ -93,3 +93,4 @@ export type AccountAction =
   | { type: "APPEND_USER"; payload: string }
   | { type: "APPEND_JWT"; payload: string }
   | { type: "ADD_OUTGOING_URL"; outGoingUrl : string | null };
+

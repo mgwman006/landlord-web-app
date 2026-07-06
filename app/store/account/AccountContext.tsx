@@ -18,10 +18,10 @@ const loadInitialState = (): AccountState => {
     {
       const parsed = JSON.parse(stored);
       return {
-        accountDetails: parsed.accountDetails,
+        accountDetails: parsed.accountDetails ?? null,
         loading: false,
-        error: null,
-        outGoingUrl: null
+        error: parsed.error ?? null,
+        outGoingUrl: parsed.outGoingUrl ?? null
       };
     }
   } 
@@ -48,12 +48,16 @@ export const AccountProvider: React.FC<{ children: React.ReactNode }> = ({ child
       {
         localStorage.setItem(ACCOUNT_STORAGE_KEY, JSON.stringify(state));
       }
+      else
+      {
+        localStorage.removeItem(ACCOUNT_STORAGE_KEY);
+      }
     } 
     catch (e) 
     {
       console.error("Failed to save state", e);
     }
-  }, [state.accountDetails]);
+  }, [state.accountDetails, state.loading, state.error, state.outGoingUrl]);
 
   const value = useMemo(() => {
     return { accountState: state, dispatchAccountState: dispatch };

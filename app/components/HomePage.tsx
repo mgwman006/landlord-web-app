@@ -34,6 +34,7 @@ import { useEffect, useState } from "react";
 import { membershipApi, rentalProfileApi } from "../api/api";
 import { handleApiError } from "../utilities/error-handler";
 import { CreateRentalProfileDTO } from "../models/rentalprofile";
+import CreateRentalProfile from "./rentalprofile/CreateRentalProfile";
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -48,6 +49,31 @@ const OFF = "#F8FAFC";
 
 const authUrl = import.meta.env.VITE_AUTH_URL?.trim();
 
+function isTokenExpired(token?: string): boolean {
+  if (!token) {
+    return true;
+  }
+
+  try {
+    const parts = token.split(".");
+    if (parts.length < 2) {
+      return true;
+    }
+
+    const payload = JSON.parse(atob(parts[1].replace(/-/g, "+").replace(/_/g, "/")));
+    const exp = payload?.exp;
+
+    if (typeof exp !== "number") {
+      return true;
+    }
+
+    return Date.now() >= exp * 1000;
+  } catch (error) {
+    console.error("Failed to decode JWT", error);
+    return true;
+  }
+}
+
 export default function HomePage() 
 {
   const [searchParams] = useSearchParams();
@@ -57,39 +83,6 @@ export default function HomePage()
   const [memberships, setMemberships] = useState<MembershipDetailsDTO[]>([]);
   const [form] = Form.useForm();
 
-
-
-  const handleOk = async (rentalProfileData: any) => {
-    const newRentalProfile: CreateRentalProfileDTO = {
-      adminUserId: accountState.accountDetails?.userDetails?.id as number,
-      type: rentalProfileData.category,
-      name: rentalProfileData.name,
-      businessEmail: rentalProfileData.businessEmail
-    };
-
-    try
-    {
-      console.log("token:", accountState.accountDetails?.token);
-      const response = await rentalProfileApi.createRentalProfile(newRentalProfile, accountState.accountDetails?.token as string);
-
-      if(response)
-      {
-        getMembershipStatus(
-          accountState.accountDetails?.userDetails?.id as number,
-          accountState.accountDetails?.token as string
-        );
-        console.log("Rental Profile Created:", response);
-        notificationApi.success({
-          message: "Rental Profile Created",
-          description: "Your rental profile has been successfully created.",
-        });
-      }
-    }
-    catch (error:any)
-    {
-      handleApiError(error,notificationApi);
-    }
-  };
 
    const getMembershipStatus = async (userId: number, token?: string) => {
     try 
@@ -110,48 +103,42 @@ export default function HomePage()
 
 
   useEffect(() => {
-    if (accountState.accountDetails) {
-      return;
-    }
-
-    if (accountStateString) {
-      try {
-        const receivedAccountState: AccountState = JSON.parse(accountStateString);
-        const details = receivedAccountState.accountDetails;
-        if (!details) {
-          console.error("Account state payload is missing accountDetails");
-          return;
-        }
-        dispatchAccountState({ type: "FETCH_SUCCESS", payload: details });
-        getMembershipStatus(
-          details.userDetails?.id as number,
-          details.token
-        );
-        form.setFieldsValue({
-          phoneNumber: details.userDetails?.phoneNumber,
-        });
-      } catch (error) {
-        console.error("Failed to parse account state from URL", error);
-      }
-      return;
-    }
-
-    if (!authUrl) {
-      console.info("VITE_AUTH_URL is not set; skipping redirect.");
+    if (!accountStateString) {
       return;
     }
 
     try {
-      const targetUrl = new URL(authUrl, window.location.origin);
-      if (targetUrl.origin === window.location.origin) {
-        console.warn("Auth URL resolves to the current app origin; skipping redirect to avoid a refresh loop.");
+      const receivedAccountState: AccountState = JSON.parse(accountStateString);
+      const details = receivedAccountState.accountDetails;
+      if (!details) {
+        console.error("Account state payload is missing accountDetails");
         return;
       }
-      window.location.href = authUrl;
+
+      if (isTokenExpired(details.token)) {
+        notificationApi.error({
+          message: "Session expired",
+          description: "Your sign-in session has expired. Please sign in again.",
+        });
+        dispatchAccountState({ type: "LOGOUT" });
+        return;
+      }
+
+      if (!accountState.accountDetails || accountState.accountDetails.token !== details.token) {
+        dispatchAccountState({ type: "FETCH_SUCCESS", payload: details });
+      }
+
+      getMembershipStatus(
+        details.userDetails?.id as number,
+        details.token
+      );
+      form.setFieldsValue({
+        phoneNumber: details.userDetails?.phoneNumber,
+      });
     } catch (error) {
-      console.error("Invalid auth URL", error);
+      console.error("Failed to parse account state from URL", error);
     }
-  }, [accountState.accountDetails, accountStateString, authUrl, dispatchAccountState, form]);
+  }, []);
 
  
 
@@ -177,31 +164,7 @@ export default function HomePage()
           </Card>
         )   
        : (
-        <Row align="middle" justify="center" style={{ minHeight: "100vh" }}>
-          <Col sm={24} md={24} lg={6} xl={6}>
-            <Title level={4}>Confirm your Mobile money payment number</Title>
-            <Form 
-                size="large"
-                form={form}
-                layout="vertical"
-                onFinish={(values) => {handleOk(values);}}
-              >
-                <Form.Item name="phoneNumber" rules={[{ required: true, message: 'Please enter the phone number' }]}>
-                  <Input 
-                    type="tel" 
-                    placeholder="Enter Phone Number" 
-                  />
-                </Form.Item>
-                <Form.Item>
-                  <Button type="primary" htmlType="submit">
-                    Confirm <ArrowRightOutlined />
-                  </Button>
-                </Form.Item>
-              </Form>
-          </Col>
-          
-         
-        </Row>
+        <CreateRentalProfile token={accountState.accountDetails?.token ?? null} />
       )
      }
     </div>

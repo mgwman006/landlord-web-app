@@ -1,19 +1,5 @@
 import { MembershipDetailsDTO } from "./user";
 
-export enum RentalProfileType
-{
-  INDIVIDUAL,
-  BUSINESS
-}
-
-export interface CreateRentalProfileDTO
-{
-    adminUserId: number;
-    type: RentalProfileType;
-    name: string;
-    businessEmail: string;
-}
-
 
 export interface RentalProfileDetailsDTO
 {
@@ -32,4 +18,46 @@ export interface RentalUnitDetailsDTO
   address: string;
   unitType: string;
   rentalProfileId: number;
+}
+
+
+  export interface CreateRentalProfileDTO
+  {
+    adminUserId:number;
+    name:string;
+    businessEmail:string | null;
+    type: RentalProfileType;
+    rentReceivingAccounts?: CreateRentReceivingAccountDTO;
+  }
+
+  export enum RentalProfileType
+  {
+    Individual = "INDIVIDUAL",
+    Company = "COMPANY"
+  }
+
+
+export interface CreateRentReceivingAccountDTO
+{
+  paymentMethod:PaymentMethod;
+  accountNumber?:string;
+  bankName?:string;
+  mobileMoneyProvider?:MobileMoneyProvider;
+  mobileMoneyNumber?:string;
+  isDefault:boolean;
+}
+
+export enum PaymentMethod
+{
+  CASH,
+  BANK_TRANSFER,
+  MOBILE_MONEY
+}
+
+export enum MobileMoneyProvider
+{
+  MIX_BY_YAS,
+  MPESA,
+  AIRTEL_MONEY,
+  HALOPESA
 }
