@@ -1,9 +1,9 @@
 import { Typography,Layout, Image, Grid, Drawer, Button, Card, Row, Divider, Col, Space, Tag, Flex } from 'antd';
 import { MenuOutlined } from '@ant-design/icons';
-import { Link, Outlet } from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
 import { useState } from 'react';
 
-const { Title, Text, } = Typography;
+const { Title, Text, Link } = Typography;
 
 const { Header, Footer, Content } = Layout;
 const { useBreakpoint } = Grid;
@@ -59,7 +59,7 @@ export default function AppLayout() {
             {navItems.map(item => (
               <Link
                 key={item.key}
-                to={item.to}
+                href={item.to}
                 style={{
                   padding: '7px 14px',
                   borderRadius: 8,
@@ -120,7 +120,7 @@ export default function AppLayout() {
         {navItems.map(item => (
           <Link
             key={item.key}
-            to={item.to}
+            href={item.to}
             onClick={() => setDrawerOpen(false)}
             style={{
               display: 'block',
@@ -176,7 +176,7 @@ export default function AppLayout() {
                 </Text>
                 <Flex vertical style={{ marginTop: 10 }}>
                   <Link 
-                    to="#"    
+                    href="#"    
                     style={{
                       color: "#94a3b8",
                       marginTop:2
@@ -185,7 +185,7 @@ export default function AppLayout() {
                       Features
                   </Link>
                   <Link 
-                    to="#"
+                    href="#"
                     style={{
                       color: "#94a3b8",
                       marginTop:2
@@ -194,7 +194,7 @@ export default function AppLayout() {
                     Pricing
                   </Link>
                   <Link 
-                    to="#"
+                    href="#"
                     style={{
                       color: "#94a3b8",
                       marginTop:2
@@ -203,7 +203,7 @@ export default function AppLayout() {
                     Mobile App
                   </Link>
                   <Link 
-                    to="#"
+                    href="#"
                     style={{
                       color: "#94a3b8",
                       marginTop:2
@@ -223,7 +223,7 @@ export default function AppLayout() {
                 </Text>
                 <Flex vertical style={{ marginTop: 10 }}>
                   <Link 
-                    to="#"    
+                    href="#"    
                     style={{
                       color: "#94a3b8",
                       marginTop:2
@@ -232,7 +232,7 @@ export default function AppLayout() {
                       Blog
                   </Link>
                   <Link 
-                    to="#"
+                    href="#"
                     style={{
                       color: "#94a3b8",
                       marginTop:2
@@ -241,7 +241,7 @@ export default function AppLayout() {
                     Careers
                   </Link>
                   <Link 
-                    to="#"
+                    href="#"
                     style={{
                       color: "#94a3b8",
                       marginTop:2
@@ -261,7 +261,7 @@ export default function AppLayout() {
                 </Text>
                 <Flex vertical style={{ marginTop: 10 }}>
                   <Link 
-                    to="#"    
+                    href="#"    
                     style={{
                       color: "#94a3b8",
                       marginTop:2
@@ -270,7 +270,7 @@ export default function AppLayout() {
                       Privacy Policy
                   </Link>
                   <Link 
-                    to="#"
+                    href="#"
                     style={{
                       color: "#94a3b8",
                       marginTop:2

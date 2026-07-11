@@ -48,6 +48,7 @@ const BORDER = "#E2E8F0";
 const OFF = "#F8FAFC";
 
 const authUrl = import.meta.env.VITE_AUTH_URL?.trim();
+const rentManagerUrl = import.meta.env.VITE_RENT_MANAGER_URL?.trim();
 
 function isTokenExpired(token?: string): boolean {
   if (!token) {
@@ -101,9 +102,25 @@ export default function HomePage()
     }
   }
 
+  const navigateToAuth = (nextApp: string = "rent-manager", phone?: string) => {
+    if (!authUrl) {
+      console.error("VITE_AUTH_URL is not configured.");
+      return;
+    }
+
+    const outGoingUrlValue = nextApp === "rent-manager" ? rentManagerUrl : null;
+    if (!outGoingUrlValue) {
+      console.error("Unable to resolve outgoing URL for auth redirect.");
+      return;
+    }
+
+    const url = `${authUrl}?outGoingUrl=${encodeURIComponent(outGoingUrlValue)}&phoneNumber=${encodeURIComponent("")}`;
+    window.open(url, "_blank");
+  };
 
   useEffect(() => {
     if (!accountStateString) {
+      navigateToAuth();
       return;
     }
 
