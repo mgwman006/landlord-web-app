@@ -53,8 +53,8 @@ apiClient.interceptors.response.use(
 
 
 export const membershipApi = {
-  getAllMemberships: async (userId: number, token: string) => {
-    const res = await apiClient.get<ApiResponse<MembershipDetailsDTO []>>(`/memberships/${userId}`, {
+  getAllMembershipsByPhoneNumber: async (phoneNumber: string, token: string) => {
+    const res = await apiClient.get<ApiResponse<MembershipDetailsDTO []>>(`/memberships/phone/${phoneNumber}`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }

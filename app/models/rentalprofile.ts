@@ -23,6 +23,7 @@ export interface RentalUnitDetailsDTO
 
   export interface CreateRentalProfileDTO
   {
+    phoneNumber:string;
     adminUserId:number;
     name:string;
     businessEmail:string | null;

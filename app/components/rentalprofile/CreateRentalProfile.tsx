@@ -25,6 +25,7 @@ export default function CreateRentalProfile({ token }: CreateRentalProfileProps)
     }
 
     const newRentalProfile: CreateRentalProfileDTO = {
+      phoneNumber: accountState.accountDetails?.phoneNumber as string,
       adminUserId: accountState.accountDetails?.userDetails?.id as number,
       type: RentalProfileType.Individual,
       name: `${accountState.accountDetails?.userDetails?.firstName ?? ""} ${accountState.accountDetails?.userDetails?.lastName ?? ""}`.trim(),

@@ -86,14 +86,14 @@ export default function HomePage()
   const navigate = useNavigate();
 
 
-   const getMembershipStatus = async (userId: number, token?: string) => {
+   const getMembershipStatus = async (phoneNumber: string, token?: string) => {
     try 
     {
       if (!token) {
         console.warn("No token available for membership request, skipping call.");
         return;
       }
-      const response : MembershipDetailsDTO[] = await membershipApi.getAllMemberships(userId,token);
+      const response : MembershipDetailsDTO[] = await membershipApi.getAllMembershipsByPhoneNumber(phoneNumber, token);
       setMemberships(response);
       console.log("Memberships:", response);
     } 
@@ -116,7 +116,7 @@ export default function HomePage()
     }
 
     const url = `${authUrl}?outGoingUrl=${encodeURIComponent(outGoingUrlValue)}&phoneNumber=${encodeURIComponent("")}`;
-    window.open(url, "_blank");
+    window.location.href = url;
   };
 
   useEffect(() => {
@@ -147,7 +147,7 @@ export default function HomePage()
       }
 
       getMembershipStatus(
-        details.userDetails?.id as number,
+        details.userDetails?.phoneNumber as string,
         details.token
       );
       form.setFieldsValue({
