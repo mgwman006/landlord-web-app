@@ -3,6 +3,7 @@ import { ApiResponse } from '../models/common';
 import { ApiError } from '../models/error';
 import { MembershipDetailsDTO } from '../models/user';
 import { CreateRentalProfileDTO, RentalProfileDetailsDTO } from '../models/rentalprofile';
+import { LeaseDTO, CreateLeaseDTO } from '../models/lease';
 
 const apiUrl = import.meta.env.VITE_RENT_MANAGER_API_URL;
 
@@ -67,6 +68,46 @@ export const rentalProfileApi = {
   createRentalProfile: async (requestBody: CreateRentalProfileDTO, token: string) => {
     const res = await apiClient.post<ApiResponse<RentalProfileDetailsDTO>>(
       `/rentalprofiles`,
+      requestBody,
+      {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      }
+    );
+
+    return handleResponse(res.data);
+  },
+
+  getRentalProfileDetails: async (rentalProfileId: number, token: string) => {
+    const res = await apiClient.get<ApiResponse<RentalProfileDetailsDTO>>(
+      `/rentalprofiles/${rentalProfileId}`,
+      {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      }
+    );
+
+    return handleResponse(res.data);
+  }
+  ,
+  getLeasesByRentalProfile: async (rentalProfileId: number, token: string) => {
+    const res = await apiClient.get<ApiResponse<LeaseDTO[]>>(
+      `/rentalprofiles/${rentalProfileId}/leases`,
+      {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      }
+    );
+
+    return handleResponse(res.data);
+  },
+
+  createLease: async (requestBody: CreateLeaseDTO, token: string) => {
+    const res = await apiClient.post<ApiResponse<LeaseDTO>>(
+      `/leases`,
       requestBody,
       {
         headers: {

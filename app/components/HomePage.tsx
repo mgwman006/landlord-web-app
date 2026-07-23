@@ -27,7 +27,7 @@ import {
   MobileFilled,
   RightCircleFilled,
 } from "@ant-design/icons";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { AccountState, MembershipDetailsDTO } from "../models/user";
 import { useAccount } from "../store/account/AccountContext";
 import { useEffect, useState } from "react";
@@ -83,6 +83,7 @@ export default function HomePage()
   const { accountState, dispatchAccountState } = useAccount();
   const [memberships, setMemberships] = useState<MembershipDetailsDTO[]>([]);
   const [form] = Form.useForm();
+  const navigate = useNavigate();
 
 
    const getMembershipStatus = async (userId: number, token?: string) => {
@@ -168,9 +169,16 @@ export default function HomePage()
       {
         memberships.length > 0 ? (
           <Card style={{ margin: "20px" }}>
-            <Title level={4}>Select Rental Profiles to Proceed</Title>
+            <Title level={4}>Select Rental Profile</Title>
             {memberships.map((membership) => (
-              <Card key={membership.id} style={{ marginBottom: "10px" }}>
+              <Card
+                key={membership.id}
+                style={{ marginBottom: "10px", cursor: "pointer" }}
+                hoverable
+                onClick={() => {
+                  navigate(`/rental-profile/${membership.rentalProfileId}`);
+                }}
+              >
                 <Row gutter={16}>
                   <Col span={12}>
                     {membership.rentalProfileName} <ArrowRightOutlined style={{ color: TEAL_L, marginLeft: 8 }} />

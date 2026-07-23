@@ -1,5 +1,6 @@
 import Home from "./components/Home";
 import HomePage from "./components/HomePage";
+import RentalProfilePage from "./components/rentalprofile/RentalProfilePage";
 
 const routes = [
   {
@@ -9,6 +10,11 @@ const routes = [
       {
         path:"",
         Component: HomePage
+      }
+      ,
+      {
+        path: "rental-profile/:id",
+        Component: RentalProfilePage
       }
     ]
   }
