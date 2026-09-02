@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Button, Card, Col, Row, Space, Spin, List, Typography, notification, Modal, Form, Input, InputNumber } from "antd";
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import { RentalProfileDetailsDTO, RentalUnitDetailsDTO } from "../../models/rentalprofile";
-import { rentalProfileApi } from "../../api/api";
+import { leaseApi, rentalProfileApi } from "../../api/api";
 import { LeaseDTO, CreateLeaseDTO } from "../../models/lease";
 
 const { Title, Text } = Typography;
@@ -53,7 +53,7 @@ export default function RentalProfileDetails({ rentalProfileId, token, onBack }:
 
     setLeasesLoading(true);
     try {
-      const data = await rentalProfileApi.getLeasesByRentalProfile(rentalProfileId, token);
+      const data = await leaseApi.getLeasesByRentalProfile(rentalProfileId, token);
       setLeases(data);
     } catch (error: any) {
       notificationApi.error({ message: "Failed to load leases", description: error?.message ?? "" });
@@ -159,7 +159,7 @@ export default function RentalProfileDetails({ rentalProfileId, token, onBack }:
             };
 
             try {
-              await rentalProfileApi.createLease(newLease, token);
+              await leaseApi.createLease(newLease, token);
               notificationApi.success({
                 message: "Lease Created",
                 description: "The lease has been successfully created.",

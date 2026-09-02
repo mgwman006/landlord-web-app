@@ -90,11 +90,26 @@ export const rentalProfileApi = {
     );
 
     return handleResponse(res.data);
+  },
+
+  getByUserIdOrOrganizationId: async (userId: number, organizationId: number, token: string) => {
+    const res = await apiClient.get<ApiResponse<RentalProfileDetailsDTO[]>>(
+      `/rentalprofiles/${userId}/${organizationId}`,
+      {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      }
+    );
+
+    return handleResponse(res.data);
   }
-  ,
+};
+
+export const leaseApi = {
   getLeasesByRentalProfile: async (rentalProfileId: number, token: string) => {
     const res = await apiClient.get<ApiResponse<LeaseDTO[]>>(
-      `/rentalprofiles/${rentalProfileId}/leases`,
+      `/leases/rental-profile/${rentalProfileId}`,
       {
         headers: {
           'Authorization': `Bearer ${token}`
@@ -119,6 +134,7 @@ export const rentalProfileApi = {
     return handleResponse(res.data);
   }
 };
+
 
 
 export function handleResponse<T>(response: ApiResponse<T>): T {

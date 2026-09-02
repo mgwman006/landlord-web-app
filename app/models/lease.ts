@@ -24,6 +24,7 @@ export interface PaymentDTO {
 }
 
 export interface LeaseDTO {
+  referenceNumber: string;
   tenantName: string | undefined;
   amountDue: number;
   id: number;

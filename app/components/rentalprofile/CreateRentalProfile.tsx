@@ -4,17 +4,14 @@ import { CreateRentalProfileDTO, MobileMoneyProvider, PaymentMethod, RentalProfi
 import { rentalProfileApi } from "../../api/api";
 import { handleApiError } from "../../utilities/error-handler";
 
-type CreateRentalProfileProps = {
-  token?: string | null;
-};
 
-export default function CreateRentalProfile({ token }: CreateRentalProfileProps) {
-  const [form] = Form.useForm();
+export default function CreateRentalProfile() {
+  const [form] = Form.useForm<CreateRentalProfileDTO>();
   const [notificationApi, contextHolder] = notification.useNotification();
   const { accountState } = useAccount();
 
-  const handleOk = async (rentalProfileData: any) => {
-    const currentToken = token?.trim() || accountState.accountDetails?.token?.trim();
+  const handleOk = async (rentalProfileData: CreateRentalProfileDTO ) => {
+    const currentToken = accountState.accountDetails?.token?.trim();
 
     if (!currentToken) {
       notificationApi.error({
@@ -25,17 +22,12 @@ export default function CreateRentalProfile({ token }: CreateRentalProfileProps)
     }
 
     const newRentalProfile: CreateRentalProfileDTO = {
-      phoneNumber: accountState.accountDetails?.phoneNumber as string,
-      adminUserId: accountState.accountDetails?.userDetails?.id as number,
-      type: RentalProfileType.Individual,
-      name: `${accountState.accountDetails?.userDetails?.firstName ?? ""} ${accountState.accountDetails?.userDetails?.lastName ?? ""}`.trim(),
-      businessEmail: null,
-      rentReceivingAccounts: {
-        paymentMethod: PaymentMethod.MOBILE_MONEY,
-        mobileMoneyProvider: rentalProfileData.mobileMoneyProvider,
-        mobileMoneyNumber: rentalProfileData.mobileMoneyNumber,
-        isDefault: true,
-      },
+      name: rentalProfileData.name,
+      phoneNumber: rentalProfileData.phoneNumber,
+      email: rentalProfileData.email ?? null,
+      type: rentalProfileData.type,
+      userId: accountState.accountDetails?.userDetails?.id as number,
+      organizationId: rentalProfileData.organizationId ?? undefined
     };
 
     try
@@ -60,9 +52,11 @@ export default function CreateRentalProfile({ token }: CreateRentalProfileProps)
   return (
     <Row align="middle" justify="center" style={{ minHeight: "100vh" }}>
         {contextHolder}
-
         <Col sm={24} md={24} lg={6} xl={6}>
+           <h2 style={{ textAlign: "center" }}>Create Rental Profile</h2>
+           <p style={{ textAlign: "center" }}>Please fill in the details below to create your rental profile. This will allow you to manage your rental units and collect rent efficiently.</p>
            <Form
+                title="Create Rental Profile"
                 size="large"
                 name="createRentalProfileForm"
                 initialValues={{ remember: true }}
@@ -73,24 +67,81 @@ export default function CreateRentalProfile({ token }: CreateRentalProfileProps)
                 onFinish={handleOk}
             >
                 <Form.Item
-                    name="mobileMoneyProvider"
-                    label="Mobile Money Provider"
-                    rules={[{ required: true, message: 'Please select your mobile money provider' }]}
+                    name="name"
+                    label="Rental Profile Name"
+                    rules={[{ required: true, message: 'Please enter a name for your rental profile' }]}
                     >
-                    <Select>
-                        <Select.Option value={MobileMoneyProvider.MIX_BY_YAS}>Mix by Yas</Select.Option>
-                        <Select.Option value={MobileMoneyProvider.MPESA}>M-Pesa</Select.Option>
-                        <Select.Option value={MobileMoneyProvider.AIRTEL_MONEY}>Airtel Money</Select.Option>
-                        <Select.Option value={MobileMoneyProvider.HALOPESA}>HaloPesa</Select.Option>
-                    </Select>
+                    <Input />
                 </Form.Item>
 
                 <Form.Item
-                    name="mobileMoneyNumber"
-                    label="Mobile Money Number"
-                    rules={[{ required: true, message: 'Please enter your mobile money number' }]}
+                    name="phoneNumber"
+                    label="Phone Number"
+                    initialValue={accountState.accountDetails?.phoneNumber}
+                    rules={[{ required: true, message: 'Please enter your phone number' }]}
                     >
                     <Input />
+                </Form.Item>
+
+                <Form.Item
+                    name="email"
+                    label="Email"
+                    rules={[{ type: 'email', message: 'Please enter a valid email address' }]}
+                    >
+                    <Input />
+                </Form.Item>
+
+                <Form.Item
+                    name="type"
+                    label="Rental Profile Type"
+                    initialValue={RentalProfileType.Individual}
+                    rules={[{ required: true, message: 'Please select a rental profile type' }]}
+                    >
+                    <Select
+                        options={[
+                            { value: RentalProfileType.Individual, label: 'Individual' },
+                            { value: RentalProfileType.Business, label: 'Business' },
+                        ]}
+                    />
+                </Form.Item>
+
+                <Form.Item shouldUpdate={(prevValues, currentValues) => prevValues.type !== currentValues.type} noStyle>
+                    {({ getFieldValue }) => {
+                        const selectedType = getFieldValue('type');
+                        const isIndividualType = selectedType === RentalProfileType.Individual;
+
+                        return (
+                            <>
+                                <Form.Item
+                                    hidden={!isIndividualType}
+                                    name="userId"
+                                    label="Admin User ID"
+                                    initialValue={accountState.accountDetails?.userDetails?.id}
+                                    rules={[
+                                        { required: isIndividualType, message: 'Admin User ID is required' }
+                                    ]}
+                                >
+                                    <Input />
+                                </Form.Item>
+
+                                <Form.Item
+                                    hidden={isIndividualType}
+                                    name="organizationId"
+                                    label="Organization ID"
+                                    rules={[
+                                        { required: !isIndividualType, message: 'Organization ID is required' }
+                                    ]}
+                                >
+                                    <Select
+                                        options={accountState.accountDetails?.userDetails?.memberships.map(membership => ({
+                                            value: membership.organizationId,
+                                            label: `${membership.organizationName}: ${membership.organizationId}`
+                                        })) || []}
+                                    />
+                                </Form.Item>
+                            </>
+                        );
+                    }}
                 </Form.Item>
 
                 <Form.Item>

@@ -24,17 +24,17 @@ export interface RentalUnitDetailsDTO
   export interface CreateRentalProfileDTO
   {
     phoneNumber:string;
-    adminUserId:number;
+    userId:number;
     name:string;
-    businessEmail:string | null;
+    email:string | null;
     type: RentalProfileType;
-    rentReceivingAccounts?: CreateRentReceivingAccountDTO;
+    organizationId?:number;
   }
 
   export enum RentalProfileType
   {
     Individual = "INDIVIDUAL",
-    Company = "COMPANY"
+    Business = "BUSINESS"
   }
 
 

@@ -33,7 +33,7 @@ import { useAccount } from "../store/account/AccountContext";
 import { useEffect, useState } from "react";
 import { membershipApi, rentalProfileApi } from "../api/api";
 import { handleApiError } from "../utilities/error-handler";
-import { CreateRentalProfileDTO } from "../models/rentalprofile";
+import { CreateRentalProfileDTO, RentalProfileDetailsDTO } from "../models/rentalprofile";
 import CreateRentalProfile from "./rentalprofile/CreateRentalProfile";
 
 const { Title, Paragraph, Text } = Typography;
@@ -81,21 +81,21 @@ export default function HomePage()
   const accountStateString = searchParams.get("state");
   const [notificationApi, contextHolder] = notification.useNotification();
   const { accountState, dispatchAccountState } = useAccount();
-  const [memberships, setMemberships] = useState<MembershipDetailsDTO[]>([]);
+  const [rentalProfiles, setRentalProfiles] = useState<RentalProfileDetailsDTO[]>([]);
   const [form] = Form.useForm();
   const navigate = useNavigate();
 
 
-   const getMembershipStatus = async (phoneNumber: string, token?: string) => {
+   const getRentalProfiles = async (userId: number, organizationId: number, token?: string) => {
     try 
     {
-      if (!token) {
+      if (!token) 
+      {
         console.warn("No token available for membership request, skipping call.");
         return;
       }
-      const response : MembershipDetailsDTO[] = await membershipApi.getAllMembershipsByPhoneNumber(phoneNumber, token);
-      setMemberships(response);
-      console.log("Memberships:", response);
+      const response : RentalProfileDetailsDTO[] = await rentalProfileApi.getByUserIdOrOrganizationId(userId, organizationId, token);
+      setRentalProfiles(response);
     } 
     catch (error:any) 
     {
@@ -146,13 +146,12 @@ export default function HomePage()
         dispatchAccountState({ type: "FETCH_SUCCESS", payload: details });
       }
 
-      getMembershipStatus(
-        details.userDetails?.phoneNumber as string,
+      getRentalProfiles(
+        details.userDetails?.id as number,
+        details.userDetails?.memberships[0]?.organizationId as number,
         details.token
       );
-      form.setFieldsValue({
-        phoneNumber: details.userDetails?.phoneNumber,
-      });
+      
     } catch (error) {
       console.error("Failed to parse account state from URL", error);
     }
@@ -167,21 +166,21 @@ export default function HomePage()
       {contextHolder}
 
       {
-        memberships.length > 0 ? (
+        rentalProfiles.length > 0 ? (
           <Card style={{ margin: "20px" }}>
             <Title level={4}>Select Rental Profile</Title>
-            {memberships.map((membership) => (
+            {rentalProfiles.map((profile) => (
               <Card
-                key={membership.id}
+                key={profile.id}
                 style={{ marginBottom: "10px", cursor: "pointer" }}
                 hoverable
                 onClick={() => {
-                  navigate(`/rental-profile/${membership.rentalProfileId}`);
+                  navigate(`/rental-profile/${profile.id}`);
                 }}
               >
                 <Row gutter={16}>
                   <Col span={12}>
-                    {membership.rentalProfileName} <ArrowRightOutlined style={{ color: TEAL_L, marginLeft: 8 }} />
+                    {profile.name} <ArrowRightOutlined style={{ color: TEAL_L, marginLeft: 8 }} />
                   </Col>
                 </Row>
               </Card>
@@ -189,7 +188,7 @@ export default function HomePage()
           </Card>
         )   
        : (
-        <CreateRentalProfile token={accountState.accountDetails?.token ?? null} />
+        <CreateRentalProfile/>
       )
      }
     </div>
