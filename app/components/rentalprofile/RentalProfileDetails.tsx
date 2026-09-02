@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Button, Card, Col, Row, Space, Spin, List, Typography, notification, Modal, Form, Input, InputNumber } from "antd";
+import { Button, Card, Col, Row, Space, Spin, List, Typography, notification, Modal, Form, Input, InputNumber, Select } from "antd";
 import { ArrowLeftOutlined, RightOutlined } from "@ant-design/icons";
 import { RentalProfileDetailsDTO, RentalUnitDetailsDTO } from "../../models/rentalprofile";
 import { leaseApi, rentalProfileApi } from "../../api/api";
@@ -162,7 +162,7 @@ export default function RentalProfileDetails({ rentalProfileId, token, onBack }:
                         <div style={{ color: '#555' }}>{lease.unitId ? `Unit ${lease.unitId}` : ''}</div>
                       </Col>
                       <Col style={{ textAlign: 'right' }}>
-                        <div>KES {lease.rentAmount ?? lease.amountDue ?? 0}</div>
+                        <div> {lease.rentAmount ?? lease.amountDue ?? 0} {lease.currency}</div>
                         <div style={{ color: '#888' }}>{lease.startDate} → {lease.endDate}</div>
                       </Col>
                     </Row>
@@ -247,7 +247,7 @@ export default function RentalProfileDetails({ rentalProfileId, token, onBack }:
             label="Start Date"
             rules={[{ required: true, message: "Please enter the lease start date" }]}
           >
-            <Input type="date" />
+            <Input type="date"/>
           </Form.Item>
 
           <Form.Item
@@ -271,7 +271,14 @@ export default function RentalProfileDetails({ rentalProfileId, token, onBack }:
             label="Currency"
             rules={[{ required: true, message: "Please enter the currency" }]}
           >
-            <Input />
+            <Select
+              options={[
+                { value: "TZS", label: "TZS" },
+                // { value: "USD", label: "USD" },
+                // { value: "EUR", label: "EUR" },
+                // Add more currencies as needed
+              ]}
+            />
           </Form.Item>
 
           <Form.Item
@@ -279,7 +286,14 @@ export default function RentalProfileDetails({ rentalProfileId, token, onBack }:
             label="Rent Period"
             rules={[{ required: true, message: "Please select the rent period" }]}
           >
-            <Input />
+            <Select
+              options={[
+                { value: "DAILY", label: "Daily" },
+                { value: "WEEKLY", label: "Weekly" },
+                { value: "MONTHLY", label: "Monthly" },
+                { value: "YEARLY", label: "Yearly" },
+              ]}
+            />
           </Form.Item>
 
           <Form.Item
