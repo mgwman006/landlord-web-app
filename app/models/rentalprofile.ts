@@ -5,10 +5,13 @@ export interface RentalProfileDetailsDTO
 {
   id: number;
   name: string;
-  businessEmail: string;
+  email: string;
   type: RentalProfileType;
-  memberships: MembershipDetailsDTO[];
-  units: RentalUnitDetailsDTO[];
+  phoneNumber: string;
+  userId: number;
+  organizationId?: number;
+  organizationName?: string;
+  rentalUnits: RentalUnitDetailsDTO[];
 }
 
 export interface RentalUnitDetailsDTO

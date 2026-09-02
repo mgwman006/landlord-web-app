@@ -47,12 +47,13 @@ export interface CreateLeaseDTO {
   rentalProfileId: number;
   unitId: number;
   tenantId?: number;
-  tenantName?: string;
-  rentAmount: number;
-  rentPeriod?: RentPeriod;
-  requiredDeposit?: number;
-  paidDeposit?: number;
-  currency?: string;
+  tenantFirstName?: string;
+  tenantLastName?: string;
+  tenantPhoneNumber?: string;
   startDate?: string;
   endDate?: string;
+  rentAmount: number;
+  currency: string;
+  rentPeriod?: RentPeriod;
 }
+
