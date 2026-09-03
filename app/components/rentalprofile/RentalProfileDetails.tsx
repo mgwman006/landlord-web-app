@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Button, Card, Col, Row, Space, Spin, List, Typography, notification, Modal, Form, Input, InputNumber, Select } from "antd";
+import { Avatar, Button, Card, Col, Row, Space, Spin, Typography, notification, Modal, Form, Input, InputNumber, Select, Tag } from "antd";
+const { Meta } = Card;
 import { ArrowLeftOutlined, RightOutlined } from "@ant-design/icons";
 import { RentalProfileDetailsDTO, RentalUnitDetailsDTO } from "../../models/rentalprofile";
 import { leaseApi, rentalProfileApi } from "../../api/api";
@@ -150,26 +151,44 @@ export default function RentalProfileDetails({ rentalProfileId, token, onBack }:
           </Row>
 
           <div style={{ marginTop: 16 }}>
-            <List
-              dataSource={leases.slice(0, displayCount)}
-              loading={leasesLoading}
-              renderItem={(lease) => (
-                <List.Item key={lease.id} style={{ padding: 8 }}>
-                  <Card style={{ width: '100%' }}>
-                    <Row justify="space-between" align="middle">
-                      <Col>
-                        <Text strong>{lease.tenant?.name ?? lease.tenantName ?? `Lease #${lease.id}`}</Text>
-                        <div style={{ color: '#555' }}>{lease.unitId ? `Unit ${lease.unitId}` : ''}</div>
-                      </Col>
-                      <Col style={{ textAlign: 'right' }}>
-                        <div> {lease.rentAmount ?? lease.amountDue ?? 0} {lease.currency}</div>
-                        <div style={{ color: '#888' }}>{lease.startDate} → {lease.endDate}</div>
-                      </Col>
-                    </Row>
-                  </Card>
-                </List.Item>
-              )}
-            />
+            {leasesLoading ? (
+              <div style={{ textAlign: 'center', padding: 24 }}>
+                <Spin />
+              </div>
+            ) : (
+              <Row gutter={[16, 16]}>
+                {leases.slice(0, displayCount).map((lease) => (
+                  <Col xs={24} sm={12} md={8} lg={8} xl={8} key={lease.id}>
+                    <Card
+                      title={lease.referenceNumber}
+                      style={{ height: '100%' }}
+                      actions={[
+                        <Button key="edit-lease" type="link" onClick={() => {}}>
+                          View
+                        </Button>,
+                        <Button color="primary" key="view-lease" type="link" onClick={() => {}}>
+                          Send Invite <RightOutlined />
+                        </Button>
+                      ]}
+                      extra={<Tag color={lease.status === "ACTIVE" ? "success" : "warning"}>{lease.status}</Tag>}
+                    >
+                      <Meta
+                        avatar={
+                          <Avatar
+                            size="large"
+                            style={{ backgroundColor: '#1890ff' }}
+                          >
+                            {(lease.tenant?.name ?? lease.tenantName ?? `Lease`).charAt(0).toUpperCase()}
+                          </Avatar>
+                        }
+                        title={<Text strong>{lease.tenant?.name ?? lease.tenantName ?? lease.referenceNumber}</Text>}
+                        description={<Text type="secondary">{lease.startDate} → {lease.endDate}</Text>}
+                      />
+                    </Card>
+                  </Col>
+                ))}
+              </Row>
+            )}
 
             {displayCount < leases.length && (
               <div style={{ textAlign: 'center', marginTop: 12 }}>
