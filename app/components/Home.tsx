@@ -9,10 +9,10 @@ const { Header, Footer, Content } = Layout;
 const { useBreakpoint } = Grid;
 
 const navItems = [
-  { key: 'home', label: 'Home', to: '/' },
-  { key: 'properties', label: 'Properties', to: '/' },
-  { key: 'tenants', label: 'Tenants', to: '/' },
-  { key: 'payments', label: 'Payments', to: '/' },
+  { key: 'home', label: 'Home', to: '#' },
+  { key: 'properties', label: 'Properties', to: '#' },
+  { key: 'tenants', label: 'Tenants', to: '#' },
+  { key: 'payments', label: 'Payments', to: '#' },
 ];
 
 export default function AppLayout() {
