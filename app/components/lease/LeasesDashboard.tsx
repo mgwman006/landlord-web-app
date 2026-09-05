@@ -236,6 +236,65 @@ export default function LeasesDashboard() {
                 </Card>
               </Col>
 
+              <Col span={24}>
+                <Card 
+                    variant="borderless"
+                    title="Financials Summary" 
+                    style={{ marginBottom: 16 }}
+                >
+                  <Flex vertical gap={8}>
+                    <Flex justify="space-between">
+                      <Meta 
+                        avatar={
+                            <FieldTimeOutlined
+                              style={{ color: '#14b8a6' }} 
+                            />
+                        }
+                        title={<Text strong>Payment Period:</Text>}
+                      />
+                      <Text>{selectedLease.paymentPeriod ?? "Not specified"}</Text>
+                    </Flex>
+
+                    <Flex justify="space-between">
+                      <Meta 
+                        avatar={
+                            <DollarOutlined
+                              style={{ color: '#14b8a6' }} 
+                            />
+                        }
+                        title={<Text strong>Amount To Pay:</Text>}
+                      />
+                      <Text>{selectedLease.paymentAmount} {selectedLease.currency}</Text>
+                    </Flex>
+
+                    <Flex justify="space-between">
+                      <Meta 
+                        avatar={
+                            <DollarOutlined
+                              style={{ color: '#14b8a6' }} 
+                            />
+                        }
+                        title={<Text strong>Amount Paid:</Text>}
+                      />
+                      <Text>{selectedLease.amountPaid ?? 0} {selectedLease.currency}</Text>
+                    </Flex>
+
+                    <Flex justify="space-between">
+                      <Meta 
+                        avatar={
+                            <DollarOutlined
+                              style={{ color: 'red' }} 
+                            />
+                        }
+                        title={<Text strong>Balance:</Text>}
+                      />
+                      <Text>{selectedLease.balance ?? selectedLease.rentAmount} {selectedLease.currency}</Text>
+                    </Flex>
+
+                  </Flex>
+                </Card>
+              </Col>
+
           
             </Row>
           </>
