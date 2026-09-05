@@ -1,22 +1,17 @@
 import { useEffect, useState } from "react";
-import { Avatar, Button, Card, Col, Row, Space, Spin, Typography, notification, Modal, Form, Input, InputNumber, Select, Tag } from "antd";
+import { Button, Card, Col, Row, Space, Spin, Typography, notification, Modal, Form, Input, InputNumber, Select, Tag } from "antd";
 const { Meta } = Card;
-import { ArrowLeftOutlined, RightOutlined } from "@ant-design/icons";
-import { RentalProfileDetailsDTO, RentalUnitDetailsDTO } from "../../models/rentalprofile";
-import { leaseApi, rentalProfileApi } from "../../api/api";
+import { MoreOutlined, PlusCircleFilled, PlusOutlined, RightOutlined } from "@ant-design/icons";
+import { useOutletContext } from "react-router-dom";
+import { leaseApi } from "../../api/api";
 import { LeaseDTO, CreateLeaseDTO } from "../../models/lease";
-import Ribbon from "antd/es/badge/Ribbon";
+import { useAccount } from "../../store/account/AccountContext";
 
 const { Title, Text } = Typography;
 
-type RentalProfileDetailsProps = {
-  rentalProfileId: number;
-  token: string | null;
-  onBack: () => void;
-};
 
-export default function RentalProfileDetails({ rentalProfileId, token, onBack }: RentalProfileDetailsProps) {
-  const [profile, setProfile] = useState<RentalProfileDetailsDTO | null>(null);
+
+export default function LeasesDashboard() {
   const [loading, setLoading] = useState(false);
   const [leases, setLeases] = useState<LeaseDTO[]>([]);
   const [leasesLoading, setLeasesLoading] = useState(false);
@@ -24,33 +19,12 @@ export default function RentalProfileDetails({ rentalProfileId, token, onBack }:
   const [displayCount, setDisplayCount] = useState<number>(5);
   const [leaseForm] = Form.useForm<CreateLeaseDTO>();
   const [notificationApi, contextHolder] = notification.useNotification();
-
-  const loadProfile = async () => 
-    {
-    if (!token) {
-      notificationApi.error({
-        message: "Authentication Required",
-        description: "Please sign in again to load rental profile details.",
-      });
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const data = await rentalProfileApi.getRentalProfileDetails(rentalProfileId, token);
-      setProfile(data);
-    } catch (error: any) {
-      notificationApi.error({
-        message: "Failed to load profile",
-        description: error?.message ?? "Unable to fetch rental profile details.",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { accountState } = useAccount();
+  const { rentalProfileId } = useOutletContext<{ rentalProfileId: number }>();
+  const token = accountState.accountDetails?.token ?? "";
 
   const loadLeases = async () => {
-    if (!token) {
+    if (!token || Number.isNaN(rentalProfileId)) {
       return;
     }
 
@@ -66,9 +40,8 @@ export default function RentalProfileDetails({ rentalProfileId, token, onBack }:
   };
 
   useEffect(() => {
-    loadProfile();
     loadLeases();
-  }, [rentalProfileId, token]);
+  }, [rentalProfileId, accountState.accountDetails?.token]);
 
   const loadMore = () => setDisplayCount((c) => c + 5);
 
@@ -76,7 +49,7 @@ export default function RentalProfileDetails({ rentalProfileId, token, onBack }:
 
   const handleCreateLease = async (values: CreateLeaseDTO) => 
   {
-    if (!token) {
+    if (!token || Number.isNaN(rentalProfileId)) {
       notificationApi.error({
         message: "Authentication Required",
         description: "Please sign in again to create a lease.",
@@ -115,30 +88,10 @@ export default function RentalProfileDetails({ rentalProfileId, token, onBack }:
     );
   }
 
-  if (!profile) {
-    return (
-      <div style={{ textAlign: "center", paddingTop: 50 }}>
-        <Text type="danger">Failed to load rental profile details.</Text>
-      </div>
-    );
-  }
-
 
   return (
     <div style={{ padding: 24 }}>
       {contextHolder}
-      <Card>
-        <Row justify="space-between" align="middle">
-          <Col>
-            <Space>
-              <Button icon={<ArrowLeftOutlined />} onClick={onBack} />
-              <Title level={4} style={{ margin: 0 }}>
-                {profile ? `${profile.name}` : "No Profile Name"} {profile ? (profile.email) : ""}
-              </Title>
-            </Space>
-          </Col>
-        </Row>
-      </Card>
 
       <Card style={{ marginTop: 24 }}>
           <Row justify="space-between" align="middle">
@@ -146,7 +99,7 @@ export default function RentalProfileDetails({ rentalProfileId, token, onBack }:
                   <Title level={5}>Leases</Title>
               </Col>
               <Col>
-                  <Button type="primary" onClick={() => setCreateVisible(true)}>Create Lease</Button>
+                  <Button type="primary" onClick={() => setCreateVisible(true)}><PlusOutlined /> Create Lease</Button>
               </Col>
           </Row>
 
@@ -160,28 +113,16 @@ export default function RentalProfileDetails({ rentalProfileId, token, onBack }:
                 {leases.slice(0, displayCount).map((lease) => (
                   <Col xs={24} sm={12} md={8} lg={8} xl={8} key={lease.id}>
                     <Card
-                      title={lease.referenceNumber}
+                      title={
+                          <Tag color={lease.status === "ACTIVE" ? "green" : lease.status === "PENDING" ? "orange" : lease.status === "COMPLETED" ? "blue" : lease.status === "CANCELLED" ? "red" : "default"}>
+                            {lease.status}
+                          </Tag>
+                        }
                       style={{ height: '100%' }}
-                      actions={[
-                        <Button key="edit-lease" type="link" onClick={() => {}}>
-                          View
-                        </Button>,
-                        <Button color="primary" key="view-lease" type="link" onClick={() => {}}>
-                          Send Invite <RightOutlined />
-                        </Button>
-                      ]}
-                      extra={<Tag color={lease.status === "ACTIVE" ? "success" : "warning"}>{lease.status}</Tag>}
+                      extra={<MoreOutlined />}
                     >
                       <Meta
-                        avatar={
-                          <Avatar
-                            size="large"
-                            style={{ backgroundColor: '#1890ff' }}
-                          >
-                            {(lease.tenant?.name ?? lease.tenantName ?? `Lease`).charAt(0).toUpperCase()}
-                          </Avatar>
-                        }
-                        title={<Text strong>{lease.tenant?.name ?? lease.tenantName ?? lease.referenceNumber}</Text>}
+                        title={<Text strong>{lease.tenant?.name ?? lease.tenantName ?? "No Tenant Assigned"}</Text>}
                         description={<Text type="secondary">{lease.startDate} → {lease.endDate}</Text>}
                       />
                     </Card>
@@ -325,7 +266,6 @@ export default function RentalProfileDetails({ rentalProfileId, token, onBack }:
         </Form>
       </Modal>
   
-      
     </div>
   );
 }

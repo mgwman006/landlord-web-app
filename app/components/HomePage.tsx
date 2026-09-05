@@ -1,39 +1,13 @@
 
-import {
-  Button,
-  Card,
-  Col,
-  Row,
-  Timeline,
-  Typography,
-  Badge,
-  Tag,
-  notification,
-  Modal,
-  Form,
-  Input,
-  Select,
-} from "antd";
-import {
-  ArrowRightOutlined,
-  HomeOutlined,
-  DollarOutlined,
-  TeamOutlined,
-  BarChartOutlined,
-  PlayCircleOutlined,
-  CheckCircleFilled,
-  ThunderboltFilled,
-  SafetyCertificateFilled,
-  MobileFilled,
-  RightCircleFilled,
-} from "@ant-design/icons";
+import {Card,Col,Row,Typography,notification,Form} from "antd";
+import {ArrowRightOutlined} from "@ant-design/icons";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { AccountState, MembershipDetailsDTO } from "../models/user";
+import { AccountState } from "../models/user";
 import { useAccount } from "../store/account/AccountContext";
 import { useEffect, useState } from "react";
-import { membershipApi, rentalProfileApi } from "../api/api";
+import { rentalProfileApi } from "../api/api";
 import { handleApiError } from "../utilities/error-handler";
-import { CreateRentalProfileDTO, RentalProfileDetailsDTO } from "../models/rentalprofile";
+import { RentalProfileDetailsDTO } from "../models/rentalprofile";
 import CreateRentalProfile from "./rentalprofile/CreateRentalProfile";
 
 const { Title, Paragraph, Text } = Typography;
@@ -139,6 +113,7 @@ export default function HomePage()
           description: "Your sign-in session has expired. Please sign in again.",
         });
         dispatchAccountState({ type: "LOGOUT" });
+        navigateToAuth();
         return;
       }
 
@@ -174,9 +149,7 @@ export default function HomePage()
                 key={profile.id}
                 style={{ marginBottom: "10px", cursor: "pointer" }}
                 hoverable
-                onClick={() => {
-                  navigate(`/rental-profile/${profile.id}`);
-                }}
+                onClick={() => {navigate(`/rental-profile/${profile.id}`);}}
               >
                 <Row gutter={16}>
                   <Col span={12}>
