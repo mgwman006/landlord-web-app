@@ -3,7 +3,7 @@ import { ApiResponse } from '../models/common';
 import { ApiError } from '../models/error';
 import { MembershipDetailsDTO } from '../models/user';
 import { CreateRentalProfileDTO, RentalProfileDetailsDTO } from '../models/rentalprofile';
-import { LeaseDTO, CreateLeaseDTO } from '../models/lease';
+import { LeaseCreateDTO, LeaseDetailsDTO } from '../models/lease';
 
 const apiUrl = import.meta.env.VITE_RENT_MANAGER_API_URL;
 
@@ -108,7 +108,7 @@ export const rentalProfileApi = {
 
 export const leaseApi = {
   getLeasesByRentalProfile: async (rentalProfileId: number, token: string) => {
-    const res = await apiClient.get<ApiResponse<LeaseDTO[]>>(
+    const res = await apiClient.get<ApiResponse<LeaseDetailsDTO[]>>(
       `/leases/rental-profile/${rentalProfileId}`,
       {
         headers: {
@@ -120,8 +120,8 @@ export const leaseApi = {
     return handleResponse(res.data);
   },
 
-  createLease: async (requestBody: CreateLeaseDTO, token: string) => {
-    const res = await apiClient.post<ApiResponse<LeaseDTO>>(
+  createLease: async (requestBody: LeaseCreateDTO, token: string) => {
+    const res = await apiClient.post<ApiResponse<LeaseDetailsDTO>>(
       `/leases`,
       requestBody,
       {

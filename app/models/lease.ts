@@ -1,21 +1,37 @@
 // Mapped from backend Lease entity
-export type RentPeriod = "DAILY" | "WEEKLY" | "MONTHLY" | "YEARLY" | string;
-
-export type LeaseStatus =
-  | "ACTIVE"
-  | "PENDING"
-  | "COMPLETED"
-  | "CANCELLED"
-  | "DRAFT"
-  | string;
-
-export interface TenantDTO {
-  id: number;
-  name?: string;
-  phone?: string;
-  email?: string;
+export enum PaymentPeriod
+{
+  DAILY,
+  WEEKLY,
+  MONTHLY,
+  SIX_MONTHS,
+  YEARLY
 }
 
+export enum RentPeriod {
+  DAILY,
+  WEEKLY,
+  MONTHLY,
+  SIX_MONTHS,
+  YEARLY
+}
+
+export enum LeaseStatus {
+  ACTIVE,
+  ENDED,
+  TERMINATED,
+  PENDING
+}
+
+export interface TenantDetailsDTO {
+  id: number;
+  userId: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
+}
+ 
 export interface PaymentDTO {
   id: number;
   amount: number;
@@ -23,27 +39,23 @@ export interface PaymentDTO {
   method?: string;
 }
 
-export interface LeaseDTO {
+export interface LeaseDetailsDTO {
   referenceNumber: string;
-  tenantName: string | undefined;
-  amountDue: number;
   id: number;
   startDate: string; // ISO date
   endDate: string; // ISO date
   rentAmount: number;
-  rentPeriod?: RentPeriod;
-  requiredDeposit: number;
-  paidDeposit?: number;
   currency: string;
+  rentPeriod?: RentPeriod;
+  paymentPeriod?: PaymentPeriod;
+  paymentAmount?: number;
+  amountPaid?: number;
+  balance?: number;
   status: LeaseStatus;
-  unitId?: number;
-  tenantId?: number;
-  tenant?: TenantDTO;
-  payments?: PaymentDTO[];
-  rentalProfileId?: number;
+  tenant?: TenantDetailsDTO;
 }
 
-export interface CreateLeaseDTO {
+export interface LeaseCreateDTO {
   rentalProfileId: number;
   unitId: number;
   tenantId?: number;
@@ -55,5 +67,6 @@ export interface CreateLeaseDTO {
   rentAmount: number;
   currency: string;
   rentPeriod?: RentPeriod;
+  paymentPeriod?: PaymentPeriod;
 }
 

@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import { Button, Card, Col, Row, Space, Spin, Typography, notification, Modal, Form, Input, InputNumber, Select, Tag } from "antd";
+import { Button, Card, Col, Descriptions, Drawer, Row, Space, Spin, Typography, notification, Modal, Form, Input, InputNumber, Select, Tag, Flex } from "antd";
 const { Meta } = Card;
-import { MoreOutlined, PlusCircleFilled, PlusOutlined, RightOutlined } from "@ant-design/icons";
+import { CalendarOutlined, DollarOutlined, FieldTimeOutlined, MoreOutlined, PlusCircleFilled, PlusOutlined, RightOutlined, UserOutlined } from "@ant-design/icons";
 import { useOutletContext } from "react-router-dom";
 import { leaseApi } from "../../api/api";
-import { LeaseDTO, CreateLeaseDTO } from "../../models/lease";
+import { LeaseCreateDTO, LeaseDetailsDTO, LeaseStatus } from "../../models/lease";
 import { useAccount } from "../../store/account/AccountContext";
 
 const { Title, Text } = Typography;
@@ -13,11 +13,12 @@ const { Title, Text } = Typography;
 
 export default function LeasesDashboard() {
   const [loading, setLoading] = useState(false);
-  const [leases, setLeases] = useState<LeaseDTO[]>([]);
+  const [leases, setLeases] = useState<LeaseDetailsDTO[]>([]);
   const [leasesLoading, setLeasesLoading] = useState(false);
   const [createVisible, setCreateVisible] = useState(false);
   const [displayCount, setDisplayCount] = useState<number>(5);
-  const [leaseForm] = Form.useForm<CreateLeaseDTO>();
+  const [selectedLease, setSelectedLease] = useState<LeaseDetailsDTO | null>(null);
+  const [leaseForm] = Form.useForm<LeaseCreateDTO>();
   const [notificationApi, contextHolder] = notification.useNotification();
   const { accountState } = useAccount();
   const { rentalProfileId } = useOutletContext<{ rentalProfileId: number }>();
@@ -47,7 +48,7 @@ export default function LeasesDashboard() {
 
 
 
-  const handleCreateLease = async (values: CreateLeaseDTO) => 
+  const handleCreateLease = async (values: LeaseCreateDTO) => 
   {
     if (!token || Number.isNaN(rentalProfileId)) {
       notificationApi.error({
@@ -59,7 +60,7 @@ export default function LeasesDashboard() {
 
     try 
     {
-      const newLease: CreateLeaseDTO = {
+      const newLease: LeaseCreateDTO = {
         ...values,
         rentalProfileId: rentalProfileId,
       };
@@ -114,15 +115,15 @@ export default function LeasesDashboard() {
                   <Col xs={24} sm={12} md={8} lg={8} xl={8} key={lease.id}>
                     <Card
                       title={
-                          <Tag color={lease.status === "ACTIVE" ? "green" : lease.status === "PENDING" ? "orange" : lease.status === "COMPLETED" ? "blue" : lease.status === "CANCELLED" ? "red" : "default"}>
+                          <Tag color={lease.status === LeaseStatus.ACTIVE ? "green" : lease.status === LeaseStatus.PENDING ? "orange" : lease.status === LeaseStatus.ENDED ? "blue" : lease.status === LeaseStatus.TERMINATED ? "red" : "default"}>
                             {lease.status}
                           </Tag>
                         }
                       style={{ height: '100%' }}
-                      extra={<MoreOutlined />}
+                      extra={<MoreOutlined onClick={() => setSelectedLease(lease)} />}
                     >
                       <Meta
-                        title={<Text strong>{lease.tenant?.name ?? lease.tenantName ?? "No Tenant Assigned"}</Text>}
+                        title={<Text strong>{lease.tenant?.firstName && lease.tenant?.lastName ? `${lease.tenant.firstName} ${lease.tenant.lastName}` : "No Tenant Assigned"}</Text>}
                         description={<Text type="secondary">{lease.startDate} → {lease.endDate}</Text>}
                       />
                     </Card>
@@ -139,7 +140,109 @@ export default function LeasesDashboard() {
           </div>
       </Card>
 
-      {/* Create Lease Modal */}
+      {/* Lease Details Drawer */}
+      <Drawer
+        title={selectedLease ? `Lease Details - ${selectedLease.referenceNumber ?? "No Reference"}` : "Lease Details"}
+        placement="right"
+        width={720}
+        open={!!selectedLease}
+        onClose={() => setSelectedLease(null)}
+        extra={<Button onClick={() => setSelectedLease(null)}>Close</Button>}
+      >
+        {selectedLease && (
+          <>
+            <Row gutter={[16, 16]}>
+              <Col span={24}>
+                <Card 
+                  variant="borderless"
+                  title="Tenant" 
+                  style={{ marginBottom: 16 }}>
+                  <Meta
+                    avatar={<UserOutlined style={{ fontSize: '25px' }} />}
+                    title={selectedLease.tenant?.firstName && selectedLease.tenant?.lastName ? `${selectedLease.tenant.firstName} ${selectedLease.tenant.lastName}` : "No Tenant Assigned"}
+                    description={`${selectedLease.tenant?.email ?? "No Email Provided"} | ${selectedLease.tenant?.phoneNumber ?? "No Phone Provided"}`}
+                  />
+                </Card>
+              </Col>
+
+              {/* <Col span={24}>
+                <Card size="small" title="Property" style={{ marginBottom: 16 }}>
+                  <Descriptions column={1} size="small">
+                    <Descriptions.Item label="Unit ID">{selectedLease.unitId ?? "Not assigned"}</Descriptions.Item>
+                    <Descriptions.Item label="Property">{selectedLease.unitId ? `Unit ${selectedLease.unitId}` : "No property linked"}</Descriptions.Item>
+                    <Descriptions.Item label="Rental Profile ID">{selectedLease.rentalProfileId ?? rentalProfileId}</Descriptions.Item>
+                  </Descriptions>
+                </Card>
+              </Col> */}
+
+              <Col span={24}>
+                <Card 
+                    variant="borderless"
+                    title="Lease Terms" 
+                    style={{ marginBottom: 16 }}
+                >
+                  <Flex vertical gap={8}>
+
+                    <Flex justify="space-between">
+                      <Meta 
+                        avatar={
+                            <CalendarOutlined
+                              style={{ color: '#14b8a6' }} 
+                            />
+                        }
+                        title={<Text strong>Start Date:</Text>}
+                      />
+                  
+                      <Text>{selectedLease.startDate}</Text>
+                    </Flex>
+
+                    <Flex justify="space-between">
+                      <Meta 
+                        avatar={
+                            <CalendarOutlined
+                              style={{ color: 'red' }} 
+                            />
+                        }
+                        title={<Text strong>End Date:</Text>}
+                      />
+                      <Text>{selectedLease.endDate}</Text>
+                    </Flex>
+
+                    <Flex justify="space-between">
+                      <Meta 
+                        avatar={
+                            <DollarOutlined
+                              style={{ color: '#14b8a6' }} 
+                            />
+                        }
+                        title={<Text strong>Rent Amount:</Text>}
+                      />
+                      <Text>{selectedLease.rentAmount} {selectedLease.currency}</Text>
+                    </Flex>
+
+                    <Flex justify="space-between">
+                      <Meta 
+                        avatar={
+                            <FieldTimeOutlined
+                              style={{ color: '#14b8a6' }} 
+                            />
+                        }
+                        title={<Text strong>Rent Period:</Text>}
+                      />
+                      <Text>{selectedLease.rentPeriod ?? "Not specified"}</Text>
+                    </Flex>
+
+                  </Flex>
+                </Card>
+              </Col>
+
+          
+            </Row>
+          </>
+        )}
+      </Drawer>
+
+        {/* Create Lease Modal */}
       <Modal
         title="Create Lease"
         visible={createVisible}
