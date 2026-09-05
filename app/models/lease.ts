@@ -1,3 +1,5 @@
+import { TenantDetailsDTO, TenantInvitationDetailsDTO } from "./user";
+
 // Mapped from backend Lease entity
 export enum PaymentPeriod
 {
@@ -23,14 +25,7 @@ export enum LeaseStatus {
   PENDING = "PENDING"
 }
 
-export interface TenantDetailsDTO {
-  id: number;
-  userId: number;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phoneNumber: string;
-}
+
  
 export interface PaymentDTO {
   id: number;
@@ -53,6 +48,7 @@ export interface LeaseDetailsDTO {
   balance?: number;
   status: LeaseStatus;
   tenant?: TenantDetailsDTO;
+  tenantInvitations?: TenantInvitationDetailsDTO[];
 }
 
 export interface LeaseCreateDTO {
