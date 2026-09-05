@@ -115,7 +115,12 @@ export default function LeasesDashboard() {
                   <Col xs={24} sm={12} md={8} lg={8} xl={8} key={lease.id}>
                     <Card
                       title={
-                          <Tag color={lease.status === LeaseStatus.ACTIVE ? "green" : lease.status === LeaseStatus.PENDING ? "orange" : lease.status === LeaseStatus.ENDED ? "blue" : lease.status === LeaseStatus.TERMINATED ? "red" : "default"}>
+                          <Tag 
+                            color={lease.status.toString() === LeaseStatus.ACTIVE.toString() ? "green" : 
+                                   lease.status.toString() === LeaseStatus.PENDING.toString() ? "warning" : 
+                                   lease.status.toString() === LeaseStatus.ENDED.toString() ? "error" : 
+                                   lease.status.toString() === LeaseStatus.TERMINATED.toString() ? "error" :
+                                   "default"}>
                             {lease.status}
                           </Tag>
                         }
@@ -413,6 +418,23 @@ export default function LeasesDashboard() {
                 { value: "DAILY", label: "Daily" },
                 { value: "WEEKLY", label: "Weekly" },
                 { value: "MONTHLY", label: "Monthly" },
+                { value: "SIX_MONTHS", label: "Six Months" },
+                { value: "YEARLY", label: "Yearly" },
+              ]}
+            />
+          </Form.Item>
+
+          <Form.Item
+            name="paymentPeriod"
+            label="Payment Period"
+            rules={[{ required: true, message: "Please select the payment period" }]}
+          >
+            <Select
+              options={[
+                { value: "DAILY", label: "Daily" },
+                { value: "WEEKLY", label: "Weekly" },
+                { value: "MONTHLY", label: "Monthly" },
+                { value: "SIX_MONTHS", label: "Six Months" },
                 { value: "YEARLY", label: "Yearly" },
               ]}
             />

@@ -1,26 +1,26 @@
 // Mapped from backend Lease entity
 export enum PaymentPeriod
 {
-  DAILY,
-  WEEKLY,
-  MONTHLY,
-  SIX_MONTHS,
-  YEARLY
+  DAILY = "DAILY",
+  WEEKLY = "WEEKLY",
+  MONTHLY = "MONTHLY",
+  SIX_MONTHS = "SIX_MONTHS",
+  YEARLY = "YEARLY"
 }
 
 export enum RentPeriod {
-  DAILY,
-  WEEKLY,
-  MONTHLY,
-  SIX_MONTHS,
-  YEARLY
+  DAILY = "DAILY",
+  WEEKLY = "WEEKLY",
+  MONTHLY = "MONTHLY",
+  SIX_MONTHS = "SIX_MONTHS",
+  YEARLY = "YEARLY"
 }
 
 export enum LeaseStatus {
-  ACTIVE,
-  ENDED,
-  TERMINATED,
-  PENDING
+  ACTIVE = "ACTIVE",
+  ENDED = "ENDED",
+  TERMINATED = "TERMINATED",
+  PENDING = "PENDING"
 }
 
 export interface TenantDetailsDTO {
