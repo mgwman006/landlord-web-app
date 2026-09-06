@@ -1,5 +1,5 @@
-import { Card, Col, Drawer, Flex, Row, Button, Tag, Descriptions, Space, Listy, notification, Spin } from "antd";
-import { UserOutlined, CalendarOutlined, DollarOutlined, FieldTimeOutlined, EditFilled } from "@ant-design/icons";
+import { Card, Col, Drawer, Flex, Row, Button, Tag, Descriptions, Space, Listy, notification, Spin, Result, Badge, Alert } from "antd";
+import { UserOutlined, CalendarOutlined, DollarOutlined, FieldTimeOutlined, EditFilled, PlusCircleOutlined, PlusOutlined } from "@ant-design/icons";
 import { Typography } from "antd";
 import { useEffect, useState } from "react";
 import { LeaseDetailsDTO } from "../../models/lease";
@@ -69,18 +69,42 @@ export default function LeaseDetails()
             {leaseDetails && (
             
                 <Row gutter={[16, 16]}>
-                <Col span={24}>
-                    <Card 
-                    variant="borderless"
-                    title="Tenant" 
-                    style={{ marginBottom: 16 }}>
-                    <Meta
-                        avatar={<UserOutlined style={{ fontSize: '25px' }} />}
-                        title={leaseDetails.tenant?.firstName && leaseDetails.tenant?.lastName ? `${leaseDetails.tenant.firstName} ${leaseDetails.tenant.lastName}` : "No Tenant Assigned"}
-                        description={`${leaseDetails.tenant?.email ?? "No Email Provided"} | ${leaseDetails.tenant?.phoneNumber ?? "No Phone Provided"}`}
-                    />
-                    </Card>
-                </Col>
+                    <Col span={24}>
+                        <Card 
+                            variant="borderless"
+                            title="Tenant" 
+                            style={{ marginBottom: 16 }}>
+
+                                {
+                                    leaseDetails.tenant != null ? (
+                                        <Meta
+                                            avatar={<UserOutlined style={{ fontSize: '25px' }} />}
+                                            title={leaseDetails.tenant?.firstName && leaseDetails.tenant?.lastName ? `${leaseDetails.tenant.firstName} ${leaseDetails.tenant.lastName}` : "No Tenant Assigned"}
+                                            description={`${leaseDetails.tenant?.email ?? "No Email Provided"} | ${leaseDetails.tenant?.phoneNumber ?? "No Phone Provided"}`}
+                                        />
+
+                                    ):(
+                                        <Alert
+                                            title="No tenant accepted this lease"
+                                            description="Please follow up with your tenant or send new invite"
+                                            type="warning"
+                                            action={
+                                                <Flex vertical gap="small" >
+                                                    <Badge count={leaseDetails.tenantInvitations?.length ?? 0} >
+                                                        <Button  variant="filled">Invitations</Button>
+                                                    </Badge>
+                                                    <Button type="primary">
+                                                        Send new Invite <PlusOutlined/>
+                                                    </Button>
+                                                </Flex>
+                                            }
+                                        />
+                                        
+                                    )
+                                }
+                            
+                        </Card>
+                    </Col>
 
                 {/* <Col span={24}>
                     <Card size="small" title="Property" style={{ marginBottom: 16 }}>
