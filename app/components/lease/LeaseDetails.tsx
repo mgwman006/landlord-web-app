@@ -1,4 +1,4 @@
-import { Card, Col, Drawer, Flex, Row, Button, Tag, Descriptions, Space, Listy, notification, Spin, Result, Badge, Alert } from "antd";
+import { Card, Col, Drawer, Flex, Row, Button, Tag, Descriptions, Space, Listy, notification, Spin, Result, Badge, Alert, Modal } from "antd";
 import { UserOutlined, CalendarOutlined, DollarOutlined, FieldTimeOutlined, EditFilled, PlusCircleOutlined, PlusOutlined } from "@ant-design/icons";
 import { Typography } from "antd";
 import { useEffect, useState } from "react";
@@ -19,6 +19,7 @@ export default function LeaseDetails()
     const [leaseId, setLeaseId] = useState<number>(leaseIdParam ? parseInt(leaseIdParam, 10) : 0);
     const { accountState } = useAccount();
     const [leaseLoading, setLeaseLoading] = useState(false);
+    const [inviteModalOpen, setInviteModalOpen] = useState(false);
 
     const token = accountState.accountDetails?.token ?? "";
 
@@ -67,7 +68,7 @@ export default function LeaseDetails()
         <div>
             {contextHolder}
             {leaseDetails && (
-            
+                <>
                 <Row gutter={[16, 16]}>
                     <Col span={24}>
                         <Card 
@@ -91,7 +92,7 @@ export default function LeaseDetails()
                                             action={
                                                 <Flex vertical gap="small" >
                                                     <Badge count={leaseDetails.tenantInvitations?.length ?? 0} >
-                                                        <Button  variant="filled">Invitations</Button>
+                                                        <Button onClick={()=>setInviteModalOpen(true)}  variant="filled">Invitations</Button>
                                                     </Badge>
                                                     <Button type="primary">
                                                         Send new Invite <PlusOutlined/>
@@ -238,6 +239,36 @@ export default function LeaseDetails()
 
             
                 </Row>
+
+                     <Modal
+                        title="Existing Invites"
+                        open={inviteModalOpen}
+                        onCancel={() => setInviteModalOpen(false)}
+                        footer={null}
+                    >
+                        {leaseDetails.tenantInvitations && leaseDetails.tenantInvitations.length > 0 ? (
+                            <Listy<TenantInvitationDetailsDTO>
+                                items={leaseDetails.tenantInvitations}
+                                rowKey={'id'}
+                                itemRender={(invite) => (
+                                    <Flex justify='space-between'>
+                                        <Meta
+                                            title={`${invite.firstName} ${invite.lastName}`}
+                                            description={<Text>{invite.email} | {invite.phoneNumber}</Text>}
+                                        />
+
+                                        <Tag color={invite.status === "PENDING" ? "gold" : invite.status === "ACCEPTED" ? "green" : invite.status === "EXPIRED" ? "red" : "default"}>
+                                            {invite.status}
+                                        </Tag>
+                                    </Flex>
+                                )}
+                            />
+                        ) : (
+                            <Text type="secondary">No invites have been sent for this lease yet.</Text>
+                        )}
+                    </Modal>
+
+                </>
             )}
       
         </div>
