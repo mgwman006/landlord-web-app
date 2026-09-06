@@ -120,6 +120,19 @@ export const leaseApi = {
     return handleResponse(res.data);
   },
 
+  getLeaseById: async (id : number, token: string) => {
+    const res = await apiClient.get<ApiResponse<LeaseDetailsDTO>>(
+      `/leases/${id}`,
+      {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      }
+    );
+
+    return handleResponse(res.data);
+  },
+
   createLease: async (requestBody: LeaseCreateDTO, token: string) => {
     const res = await apiClient.post<ApiResponse<LeaseDetailsDTO>>(
       `/leases`,

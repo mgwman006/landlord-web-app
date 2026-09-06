@@ -1,0 +1,221 @@
+import { Card, Col, Drawer, Flex, Row, Button, Tag, Descriptions, Space, Listy, notification, Spin } from "antd";
+import { UserOutlined, CalendarOutlined, DollarOutlined, FieldTimeOutlined, EditFilled } from "@ant-design/icons";
+import { Typography } from "antd";
+import { useEffect, useState } from "react";
+import { LeaseDetailsDTO } from "../../models/lease";
+import { TenantInvitationDetailsDTO } from "../../models/user";
+import { useParams } from "react-router-dom";
+import { useAccount } from "../../store/account/AccountContext";
+import { leaseApi } from "../../api/api";
+const { Text } = Typography;
+const { Meta } = Card;
+
+
+export default function LeaseDetails()
+{
+    const { leaseIdParam } = useParams();
+    const [notificationApi, contextHolder] = notification.useNotification();
+    const [leaseDetails, setLeaseDetails] = useState<LeaseDetailsDTO | null>(null);
+    const [leaseId, setLeaseId] = useState<number>(leaseIdParam ? parseInt(leaseIdParam, 10) : 0);
+    const { accountState } = useAccount();
+    const [leaseLoading, setLeaseLoading] = useState(false);
+
+    const token = accountState.accountDetails?.token ?? "";
+
+    if (isNaN(leaseId)) {
+        return <div>Invalid lease id</div>;
+    }
+
+    const loadLeaseDetails = async () => 
+    {
+        if (!token) {
+          notificationApi.error({
+            message: "Authentication Required",
+            description: "Please sign in again to load rental profile details.",
+          });
+          return;
+        }
+        setLeaseLoading(true);
+        try {
+          const data = await leaseApi.getLeaseById(leaseId, token);
+          setLeaseDetails(data);
+        } catch (error: any) {
+          notificationApi.error({
+            message: "Failed to load Lease",
+            description: error?.message ?? "Unable to fetch lease details.",
+          });
+        } finally {
+            setLeaseLoading(false);
+        }
+      };
+    
+    useEffect(
+        () =>
+        {
+            loadLeaseDetails();
+        },[leaseId]
+    )
+
+    if(leaseLoading) {
+    return (
+      <div style={{ textAlign: "center", paddingTop: 50 }}>
+        <Spin size="large" />
+      </div>
+    );
+  }
+    return (
+        <div>
+            {contextHolder}
+            {leaseDetails && (
+            
+                <Row gutter={[16, 16]}>
+                <Col span={24}>
+                    <Card 
+                    variant="borderless"
+                    title="Tenant" 
+                    style={{ marginBottom: 16 }}>
+                    <Meta
+                        avatar={<UserOutlined style={{ fontSize: '25px' }} />}
+                        title={leaseDetails.tenant?.firstName && leaseDetails.tenant?.lastName ? `${leaseDetails.tenant.firstName} ${leaseDetails.tenant.lastName}` : "No Tenant Assigned"}
+                        description={`${leaseDetails.tenant?.email ?? "No Email Provided"} | ${leaseDetails.tenant?.phoneNumber ?? "No Phone Provided"}`}
+                    />
+                    </Card>
+                </Col>
+
+                {/* <Col span={24}>
+                    <Card size="small" title="Property" style={{ marginBottom: 16 }}>
+                    <Descriptions column={1} size="small">
+                        <Descriptions.Item label="Unit ID">{selectedLease.unitId ?? "Not assigned"}</Descriptions.Item>
+                        <Descriptions.Item label="Property">{selectedLease.unitId ? `Unit ${selectedLease.unitId}` : "No property linked"}</Descriptions.Item>
+                        <Descriptions.Item label="Rental Profile ID">{selectedLease.rentalProfileId ?? rentalProfileId}</Descriptions.Item>
+                    </Descriptions>
+                    </Card>
+                </Col> */}
+
+                <Col span={24}>
+                    <Card 
+                        variant="borderless"
+                        title="Lease Terms" 
+                        style={{ marginBottom: 16 }}
+                    >
+                    <Flex vertical gap={8}>
+
+                        <Flex justify="space-between">
+                        <Meta 
+                            avatar={
+                                <CalendarOutlined
+                                style={{ color: '#14b8a6' }} 
+                                />
+                            }
+                            title={<Text strong>Start Date:</Text>}
+                        />
+                    
+                        <Text>{leaseDetails.startDate}</Text>
+                        </Flex>
+
+                        <Flex justify="space-between">
+                        <Meta 
+                            avatar={
+                                <CalendarOutlined
+                                style={{ color: 'red' }} 
+                                />
+                            }
+                            title={<Text strong>End Date:</Text>}
+                        />
+                        <Text>{leaseDetails.endDate}</Text>
+                        </Flex>
+
+                        <Flex justify="space-between">
+                        <Meta 
+                            avatar={
+                                <DollarOutlined
+                                style={{ color: '#14b8a6' }} 
+                                />
+                            }
+                            title={<Text strong>Rent Amount:</Text>}
+                        />
+                        <Text>{leaseDetails.rentAmount} {leaseDetails.currency}</Text>
+                        </Flex>
+
+                        <Flex justify="space-between">
+                        <Meta 
+                            avatar={
+                                <FieldTimeOutlined
+                                style={{ color: '#14b8a6' }} 
+                                />
+                            }
+                            title={<Text strong>Rent Period:</Text>}
+                        />
+                        <Text>{leaseDetails.rentPeriod ?? "Not specified"}</Text>
+                        </Flex>
+
+                    </Flex>
+                    </Card>
+                </Col>
+
+                <Col span={24}>
+                    <Card 
+                        variant="borderless"
+                        title="Financials Summary" 
+                        style={{ marginBottom: 16 }}
+                    >
+                    <Flex vertical gap={8}>
+                        <Flex justify="space-between">
+                        <Meta 
+                            avatar={
+                                <FieldTimeOutlined
+                                style={{ color: '#14b8a6' }} 
+                                />
+                            }
+                            title={<Text strong>Payment Period:</Text>}
+                        />
+                        <Text>{leaseDetails.paymentPeriod ?? "Not specified"}</Text>
+                        </Flex>
+
+                        <Flex justify="space-between">
+                        <Meta 
+                            avatar={
+                                <DollarOutlined
+                                style={{ color: '#14b8a6' }} 
+                                />
+                            }
+                            title={<Text strong>Amount To Pay:</Text>}
+                        />
+                        <Text>{leaseDetails.paymentAmount} {leaseDetails.currency}</Text>
+                        </Flex>
+
+                        <Flex justify="space-between">
+                        <Meta 
+                            avatar={
+                                <DollarOutlined
+                                style={{ color: '#14b8a6' }} 
+                                />
+                            }
+                            title={<Text strong>Amount Paid:</Text>}
+                        />
+                        <Text>{leaseDetails.amountPaid ?? 0} {leaseDetails.currency}</Text>
+                        </Flex>
+
+                        <Flex justify="space-between">
+                        <Meta 
+                            avatar={
+                                <DollarOutlined
+                                style={{ color: 'red' }} 
+                                />
+                            }
+                            title={<Text strong>Balance:</Text>}
+                        />
+                        <Text>{leaseDetails.balance ?? leaseDetails.rentAmount} {leaseDetails.currency}</Text>
+                        </Flex>
+
+                    </Flex>
+                    </Card>
+                </Col>
+
+            
+                </Row>
+            )}
+      
+        </div>
+    );
+}
