@@ -1,12 +1,12 @@
-import { Card, Col, Drawer, Flex, Row, Button, Tag, Descriptions, Space, Listy, notification, Spin, Result, Badge, Alert, Modal } from "antd";
+import { Card, Col, Drawer, Flex, Row, Button, Tag, Descriptions, Space, Listy, notification, Spin, Result, Badge, Alert, Modal, Form, InputNumber, Input } from "antd";
 import { UserOutlined, CalendarOutlined, DollarOutlined, FieldTimeOutlined, EditFilled, PlusCircleOutlined, PlusOutlined } from "@ant-design/icons";
 import { Typography } from "antd";
 import { useEffect, useState } from "react";
 import { LeaseDetailsDTO } from "../../models/lease";
-import { TenantInvitationDetailsDTO } from "../../models/user";
+import { TenantInvitationCreateDTO, TenantInvitationDetailsDTO } from "../../models/user";
 import { useParams } from "react-router-dom";
 import { useAccount } from "../../store/account/AccountContext";
-import { leaseApi } from "../../api/api";
+import { leaseApi, tenantInvitationApi } from "../../api/api";
 const { Text } = Typography;
 const { Meta } = Card;
 
@@ -20,11 +20,41 @@ export default function LeaseDetails()
     const { accountState } = useAccount();
     const [leaseLoading, setLeaseLoading] = useState(false);
     const [inviteModalOpen, setInviteModalOpen] = useState(false);
+    const [sendInviteDrawerOpen, setSendInviteDrawerOpen] = useState(false);
+    const [tenantInvitationForm] = Form.useForm<TenantInvitationCreateDTO>();
 
     const token = accountState.accountDetails?.token ?? "";
 
     if (isNaN(leaseId)) {
         return <div>Invalid lease id</div>;
+    }
+
+    const sendTenantInvite = async (formValues:TenantInvitationCreateDTO) =>
+    {
+        if (!token) {
+          notificationApi.error({
+            message: "Authentication Required",
+            description: "Please sign in again to load rental profile details.",
+          });
+          return;
+        }
+
+        try
+        {
+            const res = await tenantInvitationApi.create(formValues,token);
+            leaseDetails?.tenantInvitations?.push(res);
+        }
+        catch(error : any)
+        {
+            notificationApi.error({
+            message: "Failed to send Invitation",
+            description: error?.message ?? "Unable to fetch lease details.",
+          });
+        }
+        finally
+        {
+            setSendInviteDrawerOpen(false);
+        }
     }
 
     const loadLeaseDetails = async () => 
@@ -94,7 +124,7 @@ export default function LeaseDetails()
                                                     <Badge count={leaseDetails.tenantInvitations?.length ?? 0} >
                                                         <Button onClick={()=>setInviteModalOpen(true)}  variant="filled">Invitations</Button>
                                                     </Badge>
-                                                    <Button type="primary">
+                                                    <Button type="primary" onClick={() => setSendInviteDrawerOpen(true)}>
                                                         Send new Invite <PlusOutlined/>
                                                     </Button>
                                                 </Flex>
@@ -267,6 +297,66 @@ export default function LeaseDetails()
                             <Text type="secondary">No invites have been sent for this lease yet.</Text>
                         )}
                     </Modal>
+
+                    <Drawer
+                        title="Send New Invite"
+                        placement="right"
+                        open={sendInviteDrawerOpen}
+                        onClose={() => setSendInviteDrawerOpen(false)}
+                    >
+                       <Form
+                            layout="vertical"
+                            form={tenantInvitationForm}
+                            onFinish={sendTenantInvite}
+                            size="large"
+                            initialValues={{
+                                leaseId : leaseDetails.id
+                            }}
+                       >
+                            <Form.Item
+                                name="leaseId"
+                                label="leaseId"
+                                required
+                            >
+                                <Input disabled/>
+                            </Form.Item>
+
+                            <Form.Item
+                                name="firstName"
+                                label="firstName"
+                                required
+                            >
+                                <Input />
+                            </Form.Item>
+                            <Form.Item
+                                name="lastName"
+                                label="lastName"
+                                required
+                            >
+                                <Input />
+                            </Form.Item>
+
+                            <Form.Item
+                                name="phoneNumber"
+                                label="Phone Number"
+                                required
+                            >
+                                <Input type='phone' />
+                            </Form.Item>
+
+                            <Form.Item
+                                name="email"
+                                label="Email"
+                            >
+                                <Input type='email' />
+                            </Form.Item>
+
+                            <Button type="primary" htmlType="submit">
+                                Submit
+                            </Button>
+
+                       </Form>
+                    </Drawer>
 
                 </>
             )}

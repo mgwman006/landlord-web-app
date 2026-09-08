@@ -47,6 +47,15 @@ export interface TenantInvitationDetailsDTO
   sentAt: string;
 }
 
+export interface TenantInvitationCreateDTO
+{
+  leaseId: number;
+  firstName: string;
+  lastName: string;
+  phoneNumber: string;
+  email: string;
+}
+
 export interface TenantDetailsDTO {
   id: number;
   userId: number;

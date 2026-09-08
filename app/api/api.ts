@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { ApiResponse } from '../models/common';
 import { ApiError } from '../models/error';
-import { MembershipDetailsDTO } from '../models/user';
+import { MembershipDetailsDTO, TenantInvitationCreateDTO, TenantInvitationDetailsDTO } from '../models/user';
 import { CreateRentalProfileDTO, RentalProfileDetailsDTO } from '../models/rentalprofile';
 import { LeaseCreateDTO, LeaseDetailsDTO } from '../models/lease';
 
@@ -147,6 +147,22 @@ export const leaseApi = {
     return handleResponse(res.data);
   }
 };
+
+export const tenantInvitationApi = {
+  create: async (requestBody:TenantInvitationCreateDTO, token:string) => {
+    const res = await apiClient.post<ApiResponse<TenantInvitationDetailsDTO>>(
+      `/tenant-invitations`,
+      requestBody,
+      {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      }
+    );
+
+    return handleResponse(res.data);
+  }
+}
 
 
 
