@@ -47,8 +47,8 @@ export default function LeaseDetails()
         catch(error : any)
         {
             notificationApi.error({
-            message: "Failed to send Invitation",
-            description: error?.message ?? "Unable to fetch lease details.",
+            message: error.message ?? "Failed to send Invitation",
+            description: error.data ?? "Unable to fetch lease details.",
           });
         }
         finally
