@@ -1,4 +1,4 @@
-import { Button, Card, Col, Drawer, Form, Input, InputNumber, notification, Row, Select, Spin, Tag, Typography } from "antd";
+import { Button, Card, Col, Drawer, Form, Input, InputNumber, notification, Radio, Row, Select, Spin, Tag, Typography } from "antd";
 import { PlusOutlined, MoreOutlined, RightOutlined } from "@ant-design/icons";
 import { LeaseCreateDTO, LeaseDetailsDTO, LeaseStatus } from "../../models/lease";
 import { useEffect, useState } from "react";
@@ -249,8 +249,8 @@ if (loading) {
                 </Form.Item>
 
                 <Form.Item
-                    name="rentPeriod"
-                    label="Rent Period"
+                    name="rentFrequency"
+                    label="Rent Frequency"
                     rules={[{ required: true, message: "Please select the rent period" }]}
                 >
                     <Select
@@ -258,26 +258,21 @@ if (loading) {
                         { value: "DAILY", label: "Daily" },
                         { value: "WEEKLY", label: "Weekly" },
                         { value: "MONTHLY", label: "Monthly" },
-                        { value: "SIX_MONTHS", label: "Six Months" },
                         { value: "YEARLY", label: "Yearly" },
                     ]}
                     />
                 </Form.Item>
 
                 <Form.Item
-                    name="paymentPeriod"
-                    label="Payment Period"
-                    rules={[{ required: true, message: "Please select the payment period" }]}
+                    name="fullLeasePaymentRequired"
+                    label="Do you need full payment"
+                    initialValue={false}
+                    rules={[{ required: true, message: "Please select whether full payment is required" }]}
                 >
-                    <Select
-                    options={[
-                        { value: "DAILY", label: "Daily" },
-                        { value: "WEEKLY", label: "Weekly" },
-                        { value: "MONTHLY", label: "Monthly" },
-                        { value: "SIX_MONTHS", label: "Six Months" },
-                        { value: "YEARLY", label: "Yearly" },
-                    ]}
-                    />
+                    <Radio.Group buttonStyle="solid">
+                        <Radio.Button value={true}>Yes</Radio.Button>
+                        <Radio.Button value={false}>No</Radio.Button>
+                    </Radio.Group>
                 </Form.Item>
 
                 <Form.Item>

@@ -201,7 +201,7 @@ export default function LeaseDetails()
                             }
                             title={<Text strong>Rent Period:</Text>}
                         />
-                        <Text>{leaseDetails.rentPeriod ?? "Not specified"}</Text>
+                        <Text>{leaseDetails.rentFrequency ?? "Not specified"}</Text>
                         </Flex>
 
                     </Flex>
@@ -224,7 +224,7 @@ export default function LeaseDetails()
                             }
                             title={<Text strong>Payment Period:</Text>}
                         />
-                        <Text>{leaseDetails.paymentPeriod ?? "Not specified"}</Text>
+                        <Text>{leaseDetails.rentFrequency ?? "Not specified"}</Text>
                         </Flex>
 
                         <Flex justify="space-between">
@@ -236,7 +236,7 @@ export default function LeaseDetails()
                             }
                             title={<Text strong>Amount To Pay:</Text>}
                         />
-                        <Text>{leaseDetails.paymentAmount} {leaseDetails.currency}</Text>
+                        <Text>{leaseDetails.totalAmount} {leaseDetails.currency}</Text>
                         </Flex>
 
                         <Flex justify="space-between">
